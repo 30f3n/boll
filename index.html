@@ -4,1837 +4,218 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مدربي | التشكيلة المباشرة ولوحة الإدارة</title>
-    
-    <!-- تحميل Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- تحميل خط Cairo للغة العربية الاحترافية -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <!-- تحميل مكتبة Lucide Icons للأيقونات الرياضية والواجهة -->
     <script src="https://unpkg.com/lucide@latest"></script>
-
     <style>
         body {
             font-family: 'Cairo', sans-serif;
             background-color: #090e17;
             color: #f8fafc;
-            overflow-x: hidden;
-            user-select: none;
-        }
-
-        /* تصميم عشب الملعب الاحترافي مع خطوط التكتيك */
-        .pitch-surface {
-            background: repeating-linear-gradient(
-                0deg,
-                #13522d 0px,
-                #13522d 36px,
-                #165e34 36px,
-                #165e34 72px
-            );
-            position: relative;
-            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.55);
-            border: 3px solid rgba(255, 255, 255, 0.75);
-            border-radius: 16px;
-            overflow: hidden;
-            touch-action: pan-y;
-        }
-
-        .pitch-surface.admin-pitch {
-            touch-action: none;
-        }
-
-        /* خطوط الملعب البيضاء */
-        .pitch-line {
-            border-color: rgba(255, 255, 255, 0.55);
-            pointer-events: none;
-        }
-
-        /* تأثير القميص/أيقونة اللاعب على الملعب */
-        .player-token {
-            position: absolute;
-            transform: translate(-50%, -50%);
-            transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s, left 0.3s ease, top 0.3s ease;
-            z-index: 10;
-        }
-
-        .player-token.admin-draggable {
-            cursor: grab;
-            touch-action: none;
-        }
-
-        .player-token.player-readonly {
-            cursor: default;
-        }
-
-        .player-token.admin-draggable:active, .player-token.dragging {
-            cursor: grabbing;
-            transform: translate(-50%, -50%) scale(1.15);
-            z-index: 50;
-            transition: none;
-        }
-
-        .player-jersey {
-            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.65), inset 0 2px 4px rgba(255, 255, 255, 0.4);
-            transition: all 0.2s ease;
-        }
-
-        /* شريط التمرير المخصص */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0f172a;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 9999px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #eab308;
-        }
-
-        /* تأثير التوهج الذهبي */
-        .gold-glow {
-            box-shadow: 0 0 20px rgba(234, 179, 8, 0.18);
-        }
-
-        /* إخفاء أسهم حقول الأرقام */
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100">
-
-    <!-- شريط حالة وضع الإدارة العلوي (يظهر فقط عند تسجيل دخول المدرب) -->
-    <div id="adminBanner" class="hidden bg-gradient-to-l from-amber-600 via-amber-500 to-yellow-500 text-slate-950 px-4 py-2 text-xs sm:text-sm font-black shadow-md">
-        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
-            <div class="flex items-center gap-2">
-                <i data-lucide="shield-check" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-                <span>وضع الإدارة مفعّل — يمكنك سحب اللاعبين وتعديل الخطة والحسابات</span>
+    <header class="bg-slate-900 border-b border-slate-800 px-4 py-3">
+        <div class="max-w-5xl mx-auto flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+                <i data-lucide="trophy" class="w-6 h-6 text-amber-400"></i>
+                <h1 class="text-xl font-black text-white">مُدَرِّبِي</h1>
+                <span id="authStatusBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    وضع اللاعبين
+                </span>
             </div>
-            <div class="flex items-center gap-2">
-                <button onclick="openChangePasswordModal()" class="px-2.5 py-1 rounded-lg bg-slate-950/15 hover:bg-slate-950/25 text-slate-950 text-xs font-extrabold flex items-center gap-1 transition">
-                    <i data-lucide="key-round" class="w-3.5 h-3.5"></i>
-                    <span>تغيير الباسورد</span>
-                </button>
-                <button onclick="logoutAdmin()" class="px-2.5 py-1 rounded-lg bg-slate-950 text-amber-400 hover:bg-slate-900 text-xs font-extrabold flex items-center gap-1 transition">
-                    <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-                    <span>خروج من الإدارة</span>
+            <div id="guestControls">
+                <button onclick="openAdminLogin()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black transition">
+                    دخول الإدارة
                 </button>
             </div>
-        </div>
-    </div>
-
-    <!-- الشريط العلوي (Header) -->
-    <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-            <!-- الشعار واسم التطبيق + مؤشر الاتصال -->
-            <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-800 border border-amber-400/50 flex items-center justify-center shadow-lg gold-glow">
-                    <i data-lucide="trophy" class="w-6 h-6 text-amber-300"></i>
-                </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <h1 class="text-xl sm:text-2xl font-black tracking-tight text-white">مُدَرِّبِي</h1>
-                        <span id="modeBadge" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">نسخة اللاعبين</span>
-                    </div>
-                    <div class="flex items-center gap-2 mt-0.5">
-                        <span id="connectionStatus" class="text-[11px] text-slate-400 flex items-center gap-1">
-                            <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> جاري الاتصال...
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- أزرار الإجراءات السريعة -->
-            <div class="flex flex-wrap items-center gap-2">
-                <!-- أزرار خاصة بالإدارة فقط -->
-                <div id="adminHeaderActions" class="hidden flex-wrap items-center gap-2">
-                    <button onclick="syncToCloud(true)" title="حفظ ومزامنة فورية مع اللاعبين" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs sm:text-sm font-black shadow-lg shadow-amber-950/40 transition active:scale-95">
-                        <i data-lucide="cloud-upload" class="w-4 h-4"></i>
-                        <span>حفظ ومزامنة</span>
-                    </button>
-
-                    <button onclick="shuffleTeams()" title="قرعة وتوزيع عشوائي متوازن" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-bold border border-slate-700 transition active:scale-95">
-                        <i data-lucide="shuffle" class="w-4 h-4 text-amber-400"></i>
-                        <span class="hidden md:inline">قرعة عشوائية</span>
-                    </button>
-
-                    <button onclick="openResetConfirm()" title="إعادة ضبط التشكيلة" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-rose-950/60 text-slate-200 hover:text-rose-300 text-xs sm:text-sm font-bold border border-slate-700 hover:border-rose-800 transition active:scale-95">
-                        <i data-lucide="rotate-ccw" class="w-4 h-4 text-rose-400"></i>
-                        <span class="hidden md:inline">تصفير</span>
-                    </button>
-                </div>
-
-                <!-- زر مشاركة واتساب (متاح للجميع) -->
-                <button onclick="shareMatchSummary()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-l from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-xs sm:text-sm font-extrabold shadow-lg shadow-emerald-950/60 transition active:scale-95">
-                    <i data-lucide="share-2" class="w-4 h-4"></i>
-                    <span class="hidden sm:inline">مشاركة التشكيلة</span>
-                </button>
-
-                <!-- زر تسجيل دخول الإدارة (يظهر في وضع اللاعبين) -->
-                <button id="adminLoginBtn" onclick="openLoginModal()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs sm:text-sm font-extrabold border border-amber-500/40 shadow-md transition active:scale-95">
-                    <i data-lucide="lock" class="w-4 h-4"></i>
-                    <span>تسجيل دخول الإدارة</span>
+            <div id="adminControls" class="hidden items-center gap-2">
+                <button onclick="logoutAdmin()" class="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-black transition">
+                    تسجيل خروج
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- المحتوى الرئيسي -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-4 py-5 space-y-6">
-
-        <!-- ========================================================= -->
-        <!-- 1. بطاقة عرض تفاصيل الحجز للاعبين (تظهر في وضع اللاعبين) -->
-        <!-- ========================================================= -->
-        <section id="playerViewSummary" class="bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl">
-            <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-800/80">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                        <i data-lucide="calendar-check" class="w-5 h-5"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-base sm:text-xl font-black text-white">تفاصيل الحجز والتشكيلة الرسمية</h2>
-                        <p class="text-xs text-slate-400">تحديث مباشر من إدارة الفريق — اضغط على اسمك لمعرفة مركزك</p>
-                    </div>
-                </div>
-                <span id="playerFormatBadge" class="px-3 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-extrabold">
-                    سباعي 7 ضد 7
-                </span>
-            </div>
-
-            <!-- شبكة بطاقات المعلومات السريعة للاعب -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                <!-- الملعب والوقت -->
-                <div class="bg-slate-950/80 border border-slate-800/90 rounded-xl p-3.5 flex flex-col justify-between">
-                    <span class="text-xs font-bold text-slate-400 flex items-center gap-1.5 mb-1.5">
-                        <i data-lucide="map-pin" class="w-4 h-4 text-emerald-400"></i> الملعب والموعد
-                    </span>
-                    <div>
-                        <div id="pvVenue" class="text-sm sm:text-base font-black text-white truncate">ملعب الأبطال</div>
-                        <div id="pvTime" class="text-xs font-bold text-amber-400 mt-0.5">غير محدد بعد</div>
-                    </div>
-                </div>
-
-                <!-- حكم المباراة -->
-                <div class="bg-slate-950/80 border border-slate-800/90 rounded-xl p-3.5 flex flex-col justify-between">
-                    <span class="text-xs font-bold text-slate-400 flex items-center gap-1.5 mb-1.5">
-                        <i data-lucide="shield" class="w-4 h-4 text-sky-400"></i> حكم المباراة
-                    </span>
-                    <div>
-                        <div id="pvReferee" class="text-sm sm:text-base font-black text-white truncate">لم يحدد</div>
-                        <div class="text-[11px] text-slate-400 mt-0.5">طاقم التحكيم</div>
-                    </div>
-                </div>
-
-                <!-- حصة اللاعب الواحد -->
-                <div class="bg-gradient-to-br from-emerald-950/80 to-slate-950 border border-emerald-700/40 rounded-xl p-3.5 flex flex-col justify-between">
-                    <span class="text-xs font-bold text-emerald-300 flex items-center gap-1.5 mb-1.5">
-                        <i data-lucide="banknote" class="w-4 h-4 text-emerald-400"></i> حصة اللاعب الواحد
-                    </span>
-                    <div>
-                        <div class="text-xl sm:text-2xl font-black text-white">
-                            <span id="pvPerPlayerCost">1,500</span>
-                            <span class="text-xs font-bold text-amber-400">د.ع</span>
-                        </div>
-                        <div id="pvTotalPriceNote" class="text-[11px] text-slate-400 mt-0.5">من أصل 20,000 د.ع (14 لاعب)</div>
-                    </div>
-                </div>
-
-                <!-- حالة التسديد -->
-                <div class="bg-slate-950/80 border border-slate-800/90 rounded-xl p-3.5 flex flex-col justify-between">
-                    <span class="text-xs font-bold text-slate-400 flex items-center gap-1.5 mb-1.5">
-                        <i data-lucide="check-circle-2" class="w-4 h-4 text-amber-400"></i> حالة تسديد الحجز
-                    </span>
-                    <div>
-                        <div id="pvPaidRatio" class="text-base sm:text-lg font-black text-emerald-400">0 / 14 لاعب</div>
-                        <div class="w-full bg-slate-800 h-2 rounded-full mt-2 overflow-hidden">
-                            <div id="pvPaidProgressBar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-8 space-y-6">
+        <section id="noMatchBox" class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center">
+            <i data-lucide="calendar-x-2" class="w-10 h-10 text-amber-400 mx-auto mb-3"></i>
+            <h2 class="text-xl font-black text-white mb-1">لا توجد مباراة حالياً</h2>
+            <p class="text-xs text-slate-400">سيتم عرض التشكيلة والموعد فور تفعيل مباراة من قِبل الإدارة.</p>
         </section>
 
-        <!-- ========================================================= -->
-        <!-- 2. لوحة تحكم الإدارة (تظهر فقط بعد تسجيل دخول المدرب)    -->
-        <!-- ========================================================= -->
-        <section id="adminControlPanel" class="hidden bg-slate-900/90 border border-amber-500/30 rounded-2xl p-4 sm:p-5 shadow-xl">
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-800/80">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="sliders-horizontal" class="w-5 h-5 text-amber-400"></i>
-                    <h2 class="text-base sm:text-lg font-extrabold text-white">إعدادات المباراة والحساب المالي (الإدارة)</h2>
+        <section id="matchBox" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                <h2 class="text-lg font-black text-white">تفاصيل المباراة المباشرة</h2>
+                <span id="matchSchedule" class="text-xs font-bold text-amber-400"></span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+                    <span class="text-xs text-slate-400 block">الملعب</span>
+                    <strong id="matchVenue" class="text-white">-</strong>
                 </div>
-                <span id="saveIndicator" class="text-xs text-emerald-400 flex items-center gap-1">
-                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> جاهز للمزامنة
-                </span>
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+                    <span class="text-xs text-slate-400 block">الحكم</span>
+                    <strong id="matchReferee" class="text-white">-</strong>
+                </div>
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+                    <span class="text-xs text-slate-400 block">سعر الحجز الكلي</span>
+                    <strong id="matchPrice" class="text-emerald-400">-</strong>
+                </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                
-                <!-- 1. نظام اللعب وعدد اللاعبين -->
-                <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 flex flex-col justify-between">
-                    <label class="text-xs font-bold text-slate-400 mb-2 flex items-center justify-between">
-                        <span>نظام اللعب (الأساسيين)</span>
-                        <span class="text-amber-400 font-extrabold" id="formatBadge">سباعي 7 ضد 7</span>
+            <div id="adminEditorBox" class="hidden pt-4 border-t border-slate-800 space-y-3">
+                <h3 class="text-sm font-black text-amber-300">تعديل بيانات المباراة (محمي بحساب الإدارة)</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                    <input id="inpVenue" type="text" placeholder="اسم الملعب" class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                    <input id="inpReferee" type="text" placeholder="اسم الحكم" class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                    <input id="inpDate" type="date" class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                    <input id="inpTime" type="time" class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <label class="flex items-center gap-2 text-xs font-bold text-slate-300">
+                        <input id="inpActive" type="checkbox" class="w-4 h-4 accent-emerald-500">
+                        <span>تفعيل المباراة للاعبين</span>
                     </label>
-                    
-                    <div class="grid grid-cols-4 gap-1.5 mb-2.5">
-                        <button onclick="setTeamSize(5)" data-size="5" class="size-preset-btn py-1.5 rounded-lg text-xs font-bold border border-slate-700 bg-slate-900 hover:border-amber-400 transition">5×5</button>
-                        <button onclick="setTeamSize(6)" data-size="6" class="size-preset-btn py-1.5 rounded-lg text-xs font-bold border border-slate-700 bg-slate-900 hover:border-amber-400 transition">6×6</button>
-                        <button onclick="setTeamSize(7)" data-size="7" class="size-preset-btn py-1.5 rounded-lg text-xs font-bold border border-amber-400 bg-amber-500/20 text-amber-300 transition">7×7</button>
-                        <button onclick="setTeamSize(8)" data-size="8" class="size-preset-btn py-1.5 rounded-lg text-xs font-bold border border-slate-700 bg-slate-900 hover:border-amber-400 transition">8×8</button>
-                    </div>
-
-                    <div class="flex items-center justify-between bg-slate-900 rounded-lg px-2.5 py-1.5 border border-slate-800">
-                        <span class="text-xs text-slate-300">عدد مخصص لكل فريق:</span>
-                        <div class="flex items-center gap-2">
-                            <button onclick="changeTeamSize(-1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold flex items-center justify-center">-</button>
-                            <span id="customSizeDisplay" class="w-6 text-center font-black text-amber-400 text-sm">7</span>
-                            <button onclick="changeTeamSize(1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold flex items-center justify-center">+</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2. سعر الحجز وتقسيم المبلغ -->
-                <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 flex flex-col justify-between">
-                    <label class="text-xs font-bold text-slate-400 mb-1.5 flex items-center justify-between">
-                        <span>سعر حجز الملعب الكامل</span>
-                        <span class="text-[11px] text-emerald-400">دينار عراقي (IQD)</span>
-                    </label>
-                    
-                    <div class="relative mb-2.5">
-                        <input type="number" id="pitchPriceInput" step="1000" min="0" value="20000" oninput="updatePrice(this.value)"
-                            class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-lg font-black text-amber-300 outline-none transition text-left" dir="ltr">
-                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">د.ع</span>
-                    </div>
-
-                    <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-300 select-none">
-                        <input type="checkbox" id="includeSubsInPrice" checked onchange="toggleIncludeSubs(this.checked)" class="w-4 h-4 rounded accent-emerald-500">
-                        <span>تشمل القسمة لاعبي الاحتياط أيضاً</span>
-                    </label>
-                </div>
-
-                <!-- 3. ملخص الحساب المالي والتحصيل -->
-                <div class="bg-gradient-to-br from-emerald-950/70 to-slate-950 border border-emerald-800/50 rounded-xl p-3.5 flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-xs font-bold text-emerald-300 flex items-center gap-1">
-                            <i data-lucide="wallet" class="w-3.5 h-3.5"></i> حصة اللاعب الواحد
-                        </span>
-                        <span id="totalPlayersCountBadge" class="text-[11px] bg-emerald-900/80 text-emerald-200 px-2 py-0.5 rounded-full font-bold">14 لاعب</span>
-                    </div>
-
-                    <div class="my-1">
-                        <div class="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                            <span id="perPlayerCostDisplay">1,500</span>
-                            <span class="text-xs font-bold text-amber-400">د.ع</span>
-                        </div>
-                        <p class="text-[11px] text-slate-400 mt-0.5" id="collectedAmountNote">المحصّل: 0 د.ع | المتبقي: 20,000 د.ع</p>
-                    </div>
-
-                    <div class="flex items-center justify-between text-xs pt-2 border-t border-emerald-900/50">
-                        <span class="text-slate-400">تم جمع المبلغ من:</span>
-                        <span id="paidCounterDisplay" class="font-extrabold text-emerald-400">0 / 14 لاعب</span>
-                    </div>
-                </div>
-
-                <!-- 4. الحكم وتفاصيل الملعب والوقت -->
-                <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 flex flex-col justify-between space-y-2">
-                    <div>
-                        <label class="text-xs font-bold text-slate-400 mb-1 flex items-center gap-1">
-                            <i data-lucide="shield" class="w-3.5 h-3.5 text-amber-400"></i> حكم المباراة
-                        </label>
-                        <input type="text" id="refereeInput" placeholder="مثال: كابتن علي حسين" oninput="updateMatchMeta()"
-                            class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-lg px-3 py-1.5 text-xs sm:text-sm text-white outline-none transition">
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="text-[11px] font-bold text-slate-400 mb-0.5 block">اسم الملعب</label>
-                            <input type="text" id="venueInput" placeholder="ملعب الأبطال" oninput="updateMatchMeta()"
-                                class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none transition">
-                        </div>
-                        <div>
-                            <label class="text-[11px] font-bold text-slate-400 mb-0.5 block">الوقت / اليوم</label>
-                            <input type="text" id="timeInput" placeholder="الخميس 9:00 م" oninput="updateMatchMeta()"
-                                class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none transition">
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- شريط التوضيح التفاعلي -->
-        <div id="instructionBanner" class="bg-slate-900/90 border border-slate-800 rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-300">
-            <div class="flex items-center gap-2" id="instructionText">
-                <i data-lucide="eye" class="w-4 h-4 text-emerald-400 shrink-0"></i>
-                <span>أنت تشاهد الآن <strong>نسخة اللاعبين المباشرة</strong>. لتعديل التشكيلة أو الأسماء، اضغط على زر <strong>"تسجيل دخول الإدارة"</strong> في الأعلى.</span>
-            </div>
-            <div class="flex items-center gap-3 text-[11px]">
-                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span> مدفوع</span>
-                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-500 inline-block"></span> غير مدفوع</span>
-            </div>
-        </div>
-
-        <!-- قسم الملاعب التفاعلية (ملعب الفريق الأول + ملعب الفريق الثاني) -->
-        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="pitchesContainer">
-            <!-- يتم توليد الملاعب ديناميكياً عبر JavaScript -->
-        </section>
-
-    </main>
-
-    <!-- التذييل (Footer) -->
-    <footer class="bg-slate-900 border-t border-slate-800 py-4 px-4 text-center text-xs text-slate-400 mt-8">
-        <p>تطبيق <strong class="text-amber-400">مُدَرِّبِي</strong> — منصة إدارة التشكيلات والحجوزات الرياضية بالمزامنة الفورية.</p>
-    </footer>
-
-    <!-- ========================================================= -->
-    <!-- النوافذ المنبثقة (Modals)                                  -->
-    <!-- ========================================================= -->
-
-    <!-- 1. نافذة تسجيل دخول الإدارة (Password Modal) -->
-    <div id="loginModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm p-6 shadow-2xl">
-            <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
-                <h3 class="text-lg font-extrabold text-white flex items-center gap-2">
-                    <i data-lucide="lock" class="w-5 h-5 text-amber-400"></i>
-                    <span>دخول لوحة الإدارة</span>
-                </h3>
-                <button onclick="closeLoginModal()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-
-            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1.5">أدخل كلمة مرور المدرب</label>
-                    <input type="password" id="adminPasswordInput" placeholder="••••" autocomplete="current-password"
-                        class="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-4 py-3 text-center text-xl font-black tracking-widest text-amber-300 outline-none">
-                    <p id="loginErrorMsg" class="hidden text-xs text-rose-400 font-bold mt-1.5 text-center">كلمة المرور غير صحيحة، حاول مرة أخرى!</p>
-                </div>
-
-                <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 text-center text-[11px] text-slate-400">
-                    كلمة المرور الافتراضية للتجربة هي: <strong class="text-amber-400 font-mono text-xs">1234</strong>
-                </div>
-
-                <div class="flex items-center gap-2 pt-2">
-                    <button type="button" onclick="closeLoginModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">إلغاء</button>
-                    <button type="submit" class="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black shadow-lg">دخول الإدارة</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- 2. نافذة تغيير كلمة مرور الإدارة -->
-    <div id="changePasswordModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm p-6 shadow-2xl">
-            <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
-                <h3 class="text-lg font-extrabold text-white flex items-center gap-2">
-                    <i data-lucide="key-round" class="w-5 h-5 text-amber-400"></i>
-                    <span>تغيير باسورد الإدارة</span>
-                </h3>
-                <button onclick="closeChangePasswordModal()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-
-            <form onsubmit="handleSaveNewPassword(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1.5">كلمة المرور الجديدة</label>
-                    <input type="text" id="newAdminPasswordInput" required minlength="3" placeholder="أدخل الباسورد الجديد"
-                        class="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-4 py-2.5 text-center text-base font-bold text-white outline-none">
-                </div>
-
-                <div class="flex items-center gap-2 pt-2">
-                    <button type="button" onclick="closeChangePasswordModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">إلغاء</button>
-                    <button type="submit" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold shadow-lg">حفظ الباسورد</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- 3. نافذة تعديل بيانات اللاعب (Modal) -->
-    <div id="playerModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-5 shadow-2xl transform transition-all">
-            <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
-                <h3 class="text-lg font-extrabold text-white flex items-center gap-2">
-                    <i data-lucide="user-cog" class="w-5 h-5 text-amber-400"></i>
-                    <span>تعديل بطاقة اللاعب</span>
-                </h3>
-                <button onclick="closePlayerModal()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-
-            <div class="space-y-4">
-                <div class="grid grid-cols-3 gap-3">
-                    <div class="col-span-2">
-                        <label class="block text-xs font-bold text-slate-400 mb-1">اسم اللاعب</label>
-                        <input type="text" id="modalPlayerName" placeholder="أدخل اسم اللاعب"
-                            class="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-sm text-white outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 mb-1">رقم القميص</label>
-                        <input type="number" id="modalPlayerNumber" min="1" max="99"
-                            class="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-sm text-center font-bold text-amber-300 outline-none">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 mb-1.5">مركز اللعب</label>
-                    <div class="grid grid-cols-4 gap-2">
-                        <button type="button" onclick="selectModalRole('GK')" data-role="GK" class="modal-role-btn py-2 rounded-xl text-xs font-extrabold border border-slate-700 bg-slate-950">حارس (GK)</button>
-                        <button type="button" onclick="selectModalRole('DEF')" data-role="DEF" class="modal-role-btn py-2 rounded-xl text-xs font-extrabold border border-slate-700 bg-slate-950">دفاع (DEF)</button>
-                        <button type="button" onclick="selectModalRole('MID')" data-role="MID" class="modal-role-btn py-2 rounded-xl text-xs font-extrabold border border-slate-700 bg-slate-950">وسط (MID)</button>
-                        <button type="button" onclick="selectModalRole('ATT')" data-role="ATT" class="modal-role-btn py-2 rounded-xl text-xs font-extrabold border border-slate-700 bg-slate-950">هجوم (ATT)</button>
-                    </div>
-                </div>
-
-                <!-- حالة الدفع -->
-                <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex items-center justify-between">
-                    <div>
-                        <span class="text-sm font-bold text-white block">حالة دفع الحجز</span>
-                        <span class="text-xs text-slate-400">هل قام اللاعب بتسديد حصته؟</span>
-                    </div>
-                    <button type="button" id="modalPaidToggle" onclick="toggleModalPaid()" class="px-4 py-2 rounded-xl text-xs font-extrabold transition">
-                        مدفوع ✓
+                    <button onclick="saveMatchAdmin()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black">
+                        حفظ ومزامنة
                     </button>
                 </div>
-
-                <!-- خيارات التبديل مع الاحتياط أو الحذف -->
-                <div id="modalSwapSection" class="pt-2 border-t border-slate-800">
-                    <label class="block text-xs font-bold text-slate-400 mb-1.5">تبديل سريع مع دكة البدلاء:</label>
-                    <div id="modalSubOptions" class="flex flex-wrap gap-1.5">
-                        <!-- خيارات البدلاء -->
-                    </div>
-                </div>
             </div>
+        </section>
+    </main>
 
-            <div class="flex items-center justify-between gap-2 mt-6 pt-3 border-t border-slate-800">
-                <button type="button" id="modalDeleteSubBtn" onclick="deleteCurrentSub()" class="hidden px-3 py-2 rounded-xl bg-rose-950/80 hover:bg-rose-900 text-rose-300 text-xs font-bold border border-rose-800">
-                    حذف من الاحتياط
-                </button>
-                <div class="flex items-center gap-2 mr-auto">
-                    <button type="button" onclick="closePlayerModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">إلغاء</button>
-                    <button type="button" onclick="savePlayerModal()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold shadow-lg">حفظ التعديلات</button>
+    <!-- نافذة دخول الإدارة بالبريد والباسورد -->
+    <div id="loginModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm p-6 space-y-4">
+            <h3 class="text-base font-black text-white">تسجيل دخول الإدارة</h3>
+            <form onsubmit="submitAdminLogin(event)" class="space-y-3">
+                <input id="loginEmail" type="email" required placeholder="البريد الإلكتروني للإدارة"
+                    class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white outline-none">
+                <input id="loginPassword" type="password" required placeholder="كلمة المرور"
+                    class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white outline-none">
+                <p id="loginErr" class="hidden text-xs text-rose-400 font-bold">بيانات الدخول غير صحيحة</p>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeAdminLogin()" class="flex-1 py-2 rounded-xl bg-slate-800 text-xs font-bold">إلغاء</button>
+                    <button type="submit" class="flex-1 py-2 rounded-xl bg-amber-500 text-slate-950 text-xs font-black">دخول</button>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 
-    <!-- 4. نافذة تأكيد التصفير -->
-    <div id="resetModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm p-5 shadow-2xl text-center">
-            <div class="w-12 h-12 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto mb-3">
-                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
-            </div>
-            <h3 class="text-lg font-extrabold text-white mb-1">إعادة ضبط التشكيلة؟</h3>
-            <p class="text-xs text-slate-400 mb-5">سيتم إعادة أسماء اللاعبين وتوزيعهم إلى الوضع الافتراضي الحالي ومزامنته.</p>
-            <div class="flex items-center justify-center gap-3">
-                <button onclick="closeResetConfirm()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold">تراجع</button>
-                <button onclick="confirmReset()" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-extrabold">نعم، أعد الضبط</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- إشعار منبثق (Toast Notification) -->
-    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden items-center gap-2 bg-slate-900 border border-emerald-500/60 text-white px-4 py-3 rounded-2xl shadow-2xl text-xs sm:text-sm font-bold">
-        <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
-        <span id="toastMessage">تم الحفظ بنجاح!</span>
-    </div>
-
-    <!-- ========================================================= -->
-    <!-- منطق التطبيق والربط الفوري مع Firebase Firestore            -->
-    <!-- ========================================================= -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { firebaseConfig, appId } from "./firebase-config.js";
 
-        // ==========================================
-        // إعدادات مشروع Firebase الخاص بك (pollwap)
-        // ==========================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyAIIFTqqXgMeD7dM8iu-NxHkLUnLyapVL8",
-            authDomain: "pollwap.firebaseapp.com",
-            projectId: "pollwap",
-            storageBucket: "pollwap.firebasestorage.app",
-            messagingSenderId: "274055335641",
-            appId: "1:274055335641:web:cc78d1321064f1e985f8c8",
-            measurementId: "G-8NYVZV1R3Z"
-        };
-        const appId = "pollwap";
+        const app = initializeApp(firebaseConfig);
+        try {
+            getAnalytics(app);
+        } catch (_) {}
 
-        // ==========================================
-        // 1. الثوابت والخطط التكتيكية
-        // ==========================================
-        const TEAM_COLORS = [
-            { name: 'أحمر ملكي', bg: '#dc2626', border: '#fca5a5', text: '#ffffff' },
-            { name: 'أزرق سماوي', bg: '#2563eb', border: '#93c5fd', text: '#ffffff' },
-            { name: 'ذهبي / أصفر', bg: '#eab308', border: '#fef08a', text: '#0f172a' },
-            { name: 'أبيض ناصع', bg: '#f8fafc', border: '#cbd5e1', text: '#0f172a' },
-            { name: 'أسود فحمي', bg: '#1e293b', border: '#94a3b8', text: '#ffffff' },
-            { name: 'بنفسجي', bg: '#7c3aed', border: '#c4b5fd', text: '#ffffff' },
-            { name: 'برتقالي', bg: '#ea580c', border: '#fdba74', text: '#ffffff' }
-        ];
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const matchDocRef = doc(db, "artifacts", appId, "public", "data", "mudaribi_matches", "active_match");
 
-        const FORMATIONS_DB = {
-            5: {
-                '1-2-1 (متوازن)': [
-                    { role: 'GK', x: 50, y: 88 },
-                    { role: 'DEF', x: 30, y: 66 },
-                    { role: 'DEF', x: 70, y: 66 },
-                    { role: 'MID', x: 50, y: 42 },
-                    { role: 'ATT', x: 50, y: 18 }
-                ],
-                '1-1-2 (هجومي)': [
-                    { role: 'GK', x: 50, y: 88 },
-                    { role: 'DEF', x: 50, y: 68 },
-                    { role: 'MID', x: 50, y: 45 },
-                    { role: 'ATT', x: 30, y: 20 },
-                    { role: 'ATT', x: 70, y: 20 }
-                ],
-                '1-3-0 (دفاعي)': [
-                    { role: 'GK', x: 50, y: 88 },
-                    { role: 'DEF', x: 25, y: 65 },
-                    { role: 'DEF', x: 50, y: 68 },
-                    { role: 'DEF', x: 75, y: 65 },
-                    { role: 'MID', x: 50, y: 32 }
-                ]
-            },
-            6: {
-                '1-2-2-1 (متوازن)': [
-                    { role: 'GK', x: 50, y: 88 },
-                    { role: 'DEF', x: 32, y: 68 },
-                    { role: 'DEF', x: 68, y: 68 },
-                    { role: 'MID', x: 28, y: 44 },
-                    { role: 'MID', x: 72, y: 44 },
-                    { role: 'ATT', x: 50, y: 18 }
-                ],
-                '1-3-1-1 (محكم)': [
-                    { role: 'GK', x: 50, y: 88 },
-                    { role: 'DEF', x: 22, y: 66 },
-                    { role: 'DEF', x: 50, y: 70 },
-                    { role: 'DEF', x: 78, y: 66 },
-                    { role: 'MID', x: 50, y: 44 },
-                    { role: 'ATT', x: 50, y: 18 }
-                ],
-                '1-2-1-2 (هجومي)': [
-                    { role: 'GK', x: 50, y: 88 },
-                    { role: 'DEF', x: 32, y: 68 },
-                    { role: 'DEF', x: 68, y: 68 },
-                    { role: 'MID', x: 50, y: 46 },
-                    { role: 'ATT', x: 32, y: 20 },
-                    { role: 'ATT', x: 68, y: 20 }
-                ]
-            },
-            7: {
-                '1-2-3-1 (مثالية للسباعي)': [
-                    { role: 'GK', x: 50, y: 89 },
-                    { role: 'DEF', x: 32, y: 70 },
-                    { role: 'DEF', x: 68, y: 70 },
-                    { role: 'MID', x: 20, y: 45 },
-                    { role: 'MID', x: 50, y: 48 },
-                    { role: 'MID', x: 80, y: 45 },
-                    { role: 'ATT', x: 50, y: 18 }
-                ],
-                '1-3-2-1 (شجرة الميلاد)': [
-                    { role: 'GK', x: 50, y: 89 },
-                    { role: 'DEF', x: 22, y: 68 },
-                    { role: 'DEF', x: 50, y: 72 },
-                    { role: 'DEF', x: 78, y: 68 },
-                    { role: 'MID', x: 35, y: 45 },
-                    { role: 'MID', x: 65, y: 45 },
-                    { role: 'ATT', x: 50, y: 18 }
-                ],
-                '1-2-2-2 (هجومية)': [
-                    { role: 'GK', x: 50, y: 89 },
-                    { role: 'DEF', x: 32, y: 70 },
-                    { role: 'DEF', x: 68, y: 70 },
-                    { role: 'MID', x: 30, y: 46 },
-                    { role: 'MID', x: 70, y: 46 },
-                    { role: 'ATT', x: 34, y: 20 },
-                    { role: 'ATT', x: 66, y: 20 }
-                ],
-                '1-3-1-2 (توازن وعمق)': [
-                    { role: 'GK', x: 50, y: 89 },
-                    { role: 'DEF', x: 22, y: 68 },
-                    { role: 'DEF', x: 50, y: 72 },
-                    { role: 'DEF', x: 78, y: 68 },
-                    { role: 'MID', x: 50, y: 46 },
-                    { role: 'ATT', x: 34, y: 20 },
-                    { role: 'ATT', x: 66, y: 20 }
-                ]
-            },
-            8: {
-                '1-3-3-1 (متوازنة)': [
-                    { role: 'GK', x: 50, y: 89 },
-                    { role: 'DEF', x: 22, y: 70 },
-                    { role: 'DEF', x: 50, y: 73 },
-                    { role: 'DEF', x: 78, y: 70 },
-                    { role: 'MID', x: 22, y: 46 },
-                    { role: 'MID', x: 50, y: 48 },
-                    { role: 'MID', x: 78, y: 46 },
-                    { role: 'ATT', x: 50, y: 18 }
-                ],
-                '1-3-2-2 (هجومية)': [
-                    { role: 'GK', x: 50, y: 89 },
-                    { role: 'DEF', x: 22, y: 70 },
-                    { role: 'DEF', x: 50, y: 73 },
-                    { role: 'DEF', x: 78, y: 70 },
-                    { role: 'MID', x: 34, y: 46 },
-                    { role: 'MID', x: 66, y: 46 },
-                    { role: 'ATT', x: 34, y: 20 },
-                    { role: 'ATT', x: 66, y: 20 }
-                ],
-                '1-4-2-1 (صلبة دفاعياً)': [
-                    { role: 'GK', x: 50, y: 89 },
-                    { role: 'DEF', x: 16, y: 68 },
-                    { role: 'DEF', x: 38, y: 72 },
-                    { role: 'DEF', x: 62, y: 72 },
-                    { role: 'DEF', x: 84, y: 68 },
-                    { role: 'MID', x: 35, y: 45 },
-                    { role: 'MID', x: 65, y: 45 },
-                    { role: 'ATT', x: 50, y: 18 }
-                ]
-            }
+        let isAdmin = false;
+        let currentMatch = {
+            hasActiveMatch: false,
+            venue: "",
+            referee: "",
+            matchDate: "",
+            matchClock: "",
+            pitchPrice: 20000
         };
 
-        const ROLE_LABELS = {
-            GK: { ar: 'حارس', badge: 'bg-amber-500 text-slate-950' },
-            DEF: { ar: 'دفاع', badge: 'bg-sky-500 text-white' },
-            MID: { ar: 'وسط', badge: 'bg-emerald-500 text-white' },
-            ATT: { ar: 'هجوم', badge: 'bg-rose-500 text-white' },
-            FWD: { ar: 'هجوم', badge: 'bg-rose-500 text-white' }
-        };
+        onAuthStateChanged(auth, (user) => {
+            isAdmin = Boolean(user);
+            document.getElementById("guestControls").classList.toggle("hidden", isAdmin);
+            document.getElementById("adminControls").classList.toggle("hidden", !isAdmin);
+            document.getElementById("adminControls").classList.toggle("flex", isAdmin);
+            document.getElementById("adminEditorBox").classList.toggle("hidden", !isAdmin);
+            document.getElementById("authStatusBadge").textContent = isAdmin ? "وضع الإدارة الموثّق" : "وضع اللاعبين";
+            renderMatchUI();
+        });
 
-        const DEFAULT_NAMES_A = ['حيدر', 'مصطفى', 'علي', 'أحمد', 'كرار', 'سجاد', 'مرتضى', 'ياسر', 'حسين', 'نور', 'عباس'];
-        const DEFAULT_NAMES_B = ['عمر', 'زيد', 'محمد', 'سيف', 'بشار', 'طارق', 'أمير', 'حسن', 'رامي', 'ماجد', 'فهد'];
-
-        // ==========================================
-        // 2. متغيرات Firebase وحالة التطبيق
-        // ==========================================
-        let db = null;
-        let auth = null;
-        let currentUser = null;
-        let matchDocRef = null;
-        let isCloudConnected = false;
-        let isAdminMode = false;
-        let syncDebounceTimer = null;
-
-        let appState = {
-            adminPassword: '1234',
-            teamSize: 7,
-            pitchPrice: 20000,
-            includeSubsInPrice: true,
-            referee: 'كابتن علي حسين',
-            venue: 'ملعب الأبطال الخماسي',
-            matchTime: 'الخميس 9:00 مساءً',
-            teams: {
-                A: {
-                    name: 'الفريق الأول (النسور)',
-                    colorIndex: 0,
-                    formation: '1-2-3-1 (مثالية للسباعي)',
-                    players: [],
-                    subs: []
-                },
-                B: {
-                    name: 'الفريق الثاني (الصقور)',
-                    colorIndex: 1,
-                    formation: '1-2-3-1 (مثالية للسباعي)',
-                    players: [],
-                    subs: []
-                }
+        onSnapshot(matchDocRef, (snap) => {
+            if (snap.exists()) {
+                currentMatch = { ...currentMatch, ...snap.data() };
             }
-        };
+            renderMatchUI();
+        });
 
-        let dragContext = null;
-        let editingTarget = null;
+        function renderMatchUI() {
+            const showMatch = Boolean(currentMatch.hasActiveMatch) || isAdmin;
+            document.getElementById("noMatchBox").classList.toggle("hidden", showMatch);
+            document.getElementById("matchBox").classList.toggle("hidden", !showMatch);
 
-        // ==========================================
-        // 3. تهيئة التشكيلات الافتراضية
-        // ==========================================
-        function generateFormationCoords(size, formationName) {
-            if (FORMATIONS_DB[size] && FORMATIONS_DB[size][formationName]) {
-                return JSON.parse(JSON.stringify(FORMATIONS_DB[size][formationName]));
+            document.getElementById("matchVenue").textContent = currentMatch.venue || "غير محدد";
+            document.getElementById("matchReferee").textContent = currentMatch.referee || "غير محدد";
+            document.getElementById("matchPrice").textContent = `${Number(currentMatch.pitchPrice || 0).toLocaleString("en-US")} د.ع`;
+
+            const sched = [currentMatch.matchDate, currentMatch.matchClock].filter(Boolean).join(" • ");
+            document.getElementById("matchSchedule").textContent = sched || "الموعد غير محدد";
+
+            if (isAdmin) {
+                document.getElementById("inpVenue").value = currentMatch.venue || "";
+                document.getElementById("inpReferee").value = currentMatch.referee || "";
+                document.getElementById("inpDate").value = currentMatch.matchDate || "";
+                document.getElementById("inpTime").value = currentMatch.matchClock || "";
+                document.getElementById("inpActive").checked = Boolean(currentMatch.hasActiveMatch);
             }
-            if (FORMATIONS_DB[size]) {
-                const firstKey = Object.keys(FORMATIONS_DB[size])[0];
-                return JSON.parse(JSON.stringify(FORMATIONS_DB[size][firstKey]));
-            }
-
-            const coords = [{ role: 'GK', x: 50, y: 89 }];
-            const outfield = size - 1;
-            if (outfield <= 0) return coords;
-
-            const defCount = Math.max(1, Math.round(outfield * 0.35));
-            const attCount = Math.max(1, Math.round(outfield * 0.25));
-            const midCount = Math.max(0, outfield - defCount - attCount);
-
-            const placeLine = (count, yPos, role) => {
-                for (let i = 0; i < count; i++) {
-                    const xPos = count === 1 ? 50 : 18 + (64 / (count - 1)) * i;
-                    coords.push({ role, x: Math.round(xPos), y: yPos });
-                }
-            };
-
-            placeLine(defCount, 70, 'DEF');
-            if (midCount > 0) placeLine(midCount, 45, 'MID');
-            placeLine(attCount, 20, 'ATT');
-
-            return coords;
+            lucide.createIcons();
         }
 
-        function buildDefaultTeamPlayers(teamKey, size, formationName) {
-            const coords = generateFormationCoords(size, formationName);
-            const namesPool = teamKey === 'A' ? DEFAULT_NAMES_A : DEFAULT_NAMES_B;
-            return coords.map((pos, idx) => ({
-                id: `${teamKey}_p_${idx}_${Date.now()}`,
-                name: namesPool[idx] || `لاعب ${idx + 1}`,
-                number: idx + 1,
-                role: pos.role,
-                x: pos.x,
-                y: pos.y,
-                paid: false
-            }));
-        }
-
-        function resetToDefaultState() {
-            const size = appState.teamSize || 7;
-            const defaultForm = FORMATIONS_DB[size] ? Object.keys(FORMATIONS_DB[size])[0] : 'تشكيلة مخصصة';
-
-            appState.teams.A.formation = defaultForm;
-            appState.teams.B.formation = defaultForm;
-            appState.teams.A.players = buildDefaultTeamPlayers('A', size, defaultForm);
-            appState.teams.B.players = buildDefaultTeamPlayers('B', size, defaultForm);
-            appState.teams.A.subs = [
-                { id: 'A_sub_1', name: 'احتياط 1', number: 12, role: 'MID', paid: false }
-            ];
-            appState.teams.B.subs = [
-                { id: 'B_sub_1', name: 'احتياط 1', number: 12, role: 'ATT', paid: false }
-            ];
-        }
-
-        // ==========================================
-        // 4. الاتصال بـ Firebase Firestore والمزامنة
-        // ==========================================
-        async function initFirebaseAndSync() {
-            resetToDefaultState();
-            updateUIForMode();
-            renderAll();
-
-            try {
-                const app = initializeApp(firebaseConfig);
-                try {
-                    getAnalytics(app);
-                } catch (_) {
-                    // Analytics اختياري وقد لا يُفعّل في جميع البيئات
-                }
-
-                auth = getAuth(app);
-                db = getFirestore(app);
-
-                const cred = await signInAnonymously(auth);
-                currentUser = cred.user;
-                if (!currentUser) throw new Error('Anonymous authentication failed');
-
-                matchDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'mudaribi_matches', 'active_match');
-
-                onSnapshot(matchDocRef, (snapshot) => {
-                    isCloudConnected = true;
-                    updateConnectionBadge(true);
-
-                    if (snapshot.exists()) {
-                        const cloudData = snapshot.data();
-                        if (!dragContext) {
-                            appState = {
-                                ...appState,
-                                ...cloudData,
-                                teams: cloudData.teams || appState.teams
-                            };
-                            syncAdminInputs();
-                            renderAll();
-                        }
-                    } else {
-                        window.syncToCloud(false);
-                    }
-                }, (error) => {
-                    console.error('Firestore listener error:', error);
-                    isCloudConnected = false;
-                    updateConnectionBadge(false);
-                });
-
-            } catch (err) {
-                console.warn('Running in offline/fallback mode:', err.message);
-                isCloudConnected = false;
-                updateConnectionBadge(false);
-            }
-        }
-
-        function updateConnectionBadge(connected) {
-            const el = document.getElementById('connectionStatus');
-            if (!el) return;
-            if (connected) {
-                el.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> <span class="text-emerald-400 font-bold">متصل مباشر (مزامنة فورية)</span>`;
-            } else {
-                el.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span> <span class="text-amber-400 font-bold">وضع محلي (بدون سحابة)</span>`;
-            }
-        }
-
-        // حفظ ومزامنة البيانات إلى السحابة
-        window.syncToCloud = async function(showNotification = false) {
-            const indicator = document.getElementById('saveIndicator');
-            if (indicator) {
-                indicator.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> جاري المزامنة...`;
-                lucide.createIcons();
-            }
-
-            if (isCloudConnected && db && currentUser && matchDocRef) {
-                try {
-                    await setDoc(matchDocRef, {
-                        ...appState,
-                        updatedAt: Date.now()
-                    });
-                    if (indicator) {
-                        indicator.innerHTML = `<i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> تمت المزامنة مع اللاعبين`;
-                        lucide.createIcons();
-                    }
-                    if (showNotification) {
-                        showToast('تم حفظ ومزامنة التشكيلة والحسابات مع جميع اللاعبين!');
-                    }
-                } catch (e) {
-                    console.error('Error saving to Firestore:', e);
-                    if (showNotification) showToast('تعذر الحفظ السحابي، تأكد من الاتصال والصلاحيات');
-                }
-            } else {
-                if (indicator) {
-                    indicator.innerHTML = `<i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> محفوظ محلياً`;
-                    lucide.createIcons();
-                }
-                if (showNotification) {
-                    showToast('تم حفظ التغييرات محلياً!');
-                }
-            }
+        window.openAdminLogin = () => {
+            document.getElementById("loginErr").classList.add("hidden");
+            const m = document.getElementById("loginModal");
+            m.classList.remove("hidden");
+            m.classList.add("flex");
         };
 
-        function triggerAutoSync() {
-            clearTimeout(syncDebounceTimer);
-            syncDebounceTimer = setTimeout(() => {
-                window.syncToCloud(false);
-            }, 450);
-        }
-
-        // ==========================================
-        // 5. التبديل بين وضع اللاعبين ووضع الإدارة
-        // ==========================================
-        window.openLoginModal = function() {
-            document.getElementById('adminPasswordInput').value = '';
-            document.getElementById('loginErrorMsg').classList.add('hidden');
-            const modal = document.getElementById('loginModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            setTimeout(() => document.getElementById('adminPasswordInput').focus(), 100);
+        window.closeAdminLogin = () => {
+            const m = document.getElementById("loginModal");
+            m.classList.add("hidden");
+            m.classList.remove("flex");
         };
 
-        window.closeLoginModal = function() {
-            const modal = document.getElementById('loginModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        };
-
-        window.handleAdminLogin = function(e) {
+        window.submitAdminLogin = async (e) => {
             e.preventDefault();
-            const entered = document.getElementById('adminPasswordInput').value.trim();
-            const correctPass = appState.adminPassword || '1234';
-
-            if (entered === correctPass) {
-                isAdminMode = true;
-                closeLoginModal();
-                updateUIForMode();
-                syncAdminInputs();
-                renderAll();
-                showToast('مرحباً كابتن! تم تفعيل لوحة الإدارة بنجاح');
-            } else {
-                document.getElementById('loginErrorMsg').classList.remove('hidden');
-            }
-        };
-
-        window.logoutAdmin = function() {
-            isAdminMode = false;
-            updateUIForMode();
-            renderAll();
-            showToast('تم الخروج من الإدارة والعودة لنسخة اللاعبين');
-        };
-
-        window.openChangePasswordModal = function() {
-            document.getElementById('newAdminPasswordInput').value = appState.adminPassword || '1234';
-            const modal = document.getElementById('changePasswordModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        };
-
-        window.closeChangePasswordModal = function() {
-            const modal = document.getElementById('changePasswordModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        };
-
-        window.handleSaveNewPassword = function(e) {
-            e.preventDefault();
-            const newPass = document.getElementById('newAdminPasswordInput').value.trim();
-            if (newPass.length >= 3) {
-                appState.adminPassword = newPass;
-                closeChangePasswordModal();
-                window.syncToCloud(false);
-                showToast('تم تحديث كلمة مرور الإدارة وحفظها!');
-            }
-        };
-
-        function updateUIForMode() {
-            const adminBanner = document.getElementById('adminBanner');
-            const adminHeaderActions = document.getElementById('adminHeaderActions');
-            const adminLoginBtn = document.getElementById('adminLoginBtn');
-            const adminControlPanel = document.getElementById('adminControlPanel');
-            const playerViewSummary = document.getElementById('playerViewSummary');
-            const modeBadge = document.getElementById('modeBadge');
-            const instructionText = document.getElementById('instructionText');
-
-            if (isAdminMode) {
-                adminBanner.classList.remove('hidden');
-                adminHeaderActions.classList.remove('hidden');
-                adminHeaderActions.classList.add('flex');
-                adminLoginBtn.classList.add('hidden');
-                adminControlPanel.classList.remove('hidden');
-                playerViewSummary.classList.add('hidden');
-
-                modeBadge.textContent = 'لوحة الإدارة';
-                modeBadge.className = 'text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40';
-
-                instructionText.innerHTML = `<i data-lucide="move" class="w-4 h-4 text-amber-400 shrink-0"></i> <span><strong>وضع الإدارة:</strong> اسحب أي لاعب لتغيير موقعه، أو <strong>انقر عليه</strong> لتعديل اسمه، مركزه، وحالة الدفع.</span>`;
-            } else {
-                adminBanner.classList.add('hidden');
-                adminHeaderActions.classList.add('hidden');
-                adminHeaderActions.classList.remove('flex');
-                adminLoginBtn.classList.remove('hidden');
-                adminControlPanel.classList.add('hidden');
-                playerViewSummary.classList.remove('hidden');
-
-                modeBadge.textContent = 'نسخة اللاعبين';
-                modeBadge.className = 'text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
-
-                instructionText.innerHTML = `<i data-lucide="eye" class="w-4 h-4 text-emerald-400 shrink-0"></i> <span>أنت تشاهد الآن <strong>نسخة اللاعبين المباشرة</strong>. لتعديل التشكيلة أو الأسماء، اضغط على <strong>"تسجيل دخول الإدارة"</strong> في الأعلى.</span>`;
-            }
-            lucide.createIcons();
-        }
-
-        // ==========================================
-        // 6. تحديث الإعدادات والحساب المالي
-        // ==========================================
-        function syncAdminInputs() {
-            document.getElementById('pitchPriceInput').value = appState.pitchPrice;
-            document.getElementById('includeSubsInPrice').checked = appState.includeSubsInPrice;
-            document.getElementById('refereeInput').value = appState.referee || '';
-            document.getElementById('venueInput').value = appState.venue || '';
-            document.getElementById('timeInput').value = appState.matchTime || '';
-            updateSizeUI();
-            updateFinancialSummary();
-        }
-
-        function updateSizeUI() {
-            const s = appState.teamSize;
-            document.getElementById('customSizeDisplay').textContent = s;
-
-            const namesMap = { 5: 'خماسي', 6: 'سداسي', 7: 'سباعي', 8: 'ثماني', 9: 'تساعي', 11: 'أحد عشر' };
-            const label = namesMap[s] ? `${namesMap[s]} ${s} ضد ${s}` : `مخصص ${s} ضد ${s}`;
-            document.getElementById('formatBadge').textContent = label;
-            document.getElementById('playerFormatBadge').textContent = label;
-
-            document.querySelectorAll('.size-preset-btn').forEach(btn => {
-                const btnSize = parseInt(btn.getAttribute('data-size'));
-                if (btnSize === s) {
-                    btn.className = 'size-preset-btn py-1.5 rounded-lg text-xs font-bold border border-amber-400 bg-amber-500/20 text-amber-300 transition';
-                } else {
-                    btn.className = 'size-preset-btn py-1.5 rounded-lg text-xs font-bold border border-slate-700 bg-slate-900 text-slate-300 hover:border-amber-400 transition';
-                }
-            });
-        }
-
-        window.setTeamSize = function(newSize) {
-            if (!isAdminMode) return;
-            newSize = Math.max(3, Math.min(11, parseInt(newSize) || 7));
-            if (newSize === appState.teamSize) return;
-
-            appState.teamSize = newSize;
-            const defaultForm = FORMATIONS_DB[newSize] ? Object.keys(FORMATIONS_DB[newSize])[0] : 'تشكيلة مخصصة';
-
-            ['A', 'B'].forEach(teamKey => {
-                const team = appState.teams[teamKey];
-                team.formation = defaultForm;
-                const coords = generateFormationCoords(newSize, defaultForm);
-                const oldPlayers = team.players;
-                const namesPool = teamKey === 'A' ? DEFAULT_NAMES_A : DEFAULT_NAMES_B;
-
-                team.players = coords.map((pos, idx) => {
-                    if (oldPlayers[idx]) {
-                        return { ...oldPlayers[idx], role: pos.role, x: pos.x, y: pos.y };
-                    }
-                    return {
-                        id: `${teamKey}_p_${idx}_${Date.now()}`,
-                        name: namesPool[idx] || `لاعب ${idx + 1}`,
-                        number: idx + 1,
-                        role: pos.role,
-                        x: pos.x,
-                        y: pos.y,
-                        paid: false
-                    };
-                });
-            });
-
-            updateSizeUI();
-            renderAll();
-            triggerAutoSync();
-            showToast(`تم تغيير نظام اللعب إلى ${newSize} ضد ${newSize}`);
-        };
-
-        window.changeTeamSize = function(delta) {
-            window.setTeamSize(appState.teamSize + delta);
-        };
-
-        window.updatePrice = function(val) {
-            if (!isAdminMode) return;
-            appState.pitchPrice = Math.max(0, parseInt(val) || 0);
-            updateFinancialSummary();
-            triggerAutoSync();
-        };
-
-        window.toggleIncludeSubs = function(checked) {
-            if (!isAdminMode) return;
-            appState.includeSubsInPrice = checked;
-            updateFinancialSummary();
-            triggerAutoSync();
-        };
-
-        window.updateMatchMeta = function() {
-            if (!isAdminMode) return;
-            appState.referee = document.getElementById('refereeInput').value;
-            appState.venue = document.getElementById('venueInput').value;
-            appState.matchTime = document.getElementById('timeInput').value;
-            updateFinancialSummary();
-            triggerAutoSync();
-        };
-
-        function updateFinancialSummary() {
-            const startersCount = appState.teams.A.players.length + appState.teams.B.players.length;
-            const subsCount = appState.teams.A.subs.length + appState.teams.B.subs.length;
-            const totalEligible = appState.includeSubsInPrice ? (startersCount + subsCount) : startersCount;
-
-            let paidCount = 0;
-            ['A', 'B'].forEach(k => {
-                paidCount += appState.teams[k].players.filter(p => p.paid).length;
-                if (appState.includeSubsInPrice) {
-                    paidCount += appState.teams[k].subs.filter(s => s.paid).length;
-                }
-            });
-
-            const exactCost = totalEligible > 0 ? (appState.pitchPrice / totalEligible) : 0;
-            const roundedIQD = exactCost > 0 ? Math.ceil(exactCost / 250) * 250 : 0;
-
-            const collectedTotal = Math.min(appState.pitchPrice, paidCount * roundedIQD);
-            const remainingTotal = Math.max(0, appState.pitchPrice - collectedTotal);
-
-            // تحديث لوحة الإدارة
-            document.getElementById('totalPlayersCountBadge').textContent = `${totalEligible} لاعب`;
-            document.getElementById('perPlayerCostDisplay').textContent = roundedIQD.toLocaleString('en-US');
-            document.getElementById('collectedAmountNote').textContent = `المحصّل: ${collectedTotal.toLocaleString('en-US')} | المتبقي: ${remainingTotal.toLocaleString('en-US')} د.ع`;
-            document.getElementById('paidCounterDisplay').textContent = `${paidCount} / ${totalEligible} لاعب`;
-
-            // تحديث بطاقة اللاعبين
-            document.getElementById('pvVenue').textContent = appState.venue || 'لم يحدد الملعب';
-            document.getElementById('pvTime').textContent = appState.matchTime || 'الوقت قيد التحديد';
-            document.getElementById('pvReferee').textContent = appState.referee || 'بدون حكم محدد';
-            document.getElementById('pvPerPlayerCost').textContent = roundedIQD.toLocaleString('en-US');
-            document.getElementById('pvTotalPriceNote').textContent = `من أصل ${appState.pitchPrice.toLocaleString('en-US')} د.ع (${totalEligible} لاعب)`;
-            document.getElementById('pvPaidRatio').textContent = `${paidCount} / ${totalEligible} لاعب`;
-
-            const pct = totalEligible > 0 ? Math.round((paidCount / totalEligible) * 100) : 0;
-            document.getElementById('pvPaidProgressBar').style.width = `${pct}%`;
-        }
-
-        // ==========================================
-        // 7. رسم الملاعب واللاعبين ودكة البدلاء
-        // ==========================================
-        function renderAll() {
-            updateSizeUI();
-            updateFinancialSummary();
-
-            const container = document.getElementById('pitchesContainer');
-            container.innerHTML = '';
-
-            ['A', 'B'].forEach(teamKey => {
-                container.appendChild(createTeamCard(teamKey));
-            });
-
-            lucide.createIcons();
-        }
-
-        function createTeamCard(teamKey) {
-            const team = appState.teams[teamKey];
-            const colorObj = TEAM_COLORS[team.colorIndex] || TEAM_COLORS[0];
-            const availableFormations = FORMATIONS_DB[appState.teamSize]
-                ? Object.keys(FORMATIONS_DB[appState.teamSize])
-                : ['تشكيلة مخصصة'];
-
-            const wrapper = document.createElement('div');
-            wrapper.className = 'bg-slate-900/95 border border-slate-800 rounded-2xl p-4 shadow-2xl flex flex-col gap-4';
-
-            const formationOptionsHtml = availableFormations.map(f =>
-                `<option value="${f}" ${team.formation === f ? 'selected' : ''}>خطة: ${f}</option>`
-            ).join('');
-
-            const colorDotsHtml = isAdminMode ? TEAM_COLORS.map((c, idx) => `
-                <button onclick="changeTeamColor('${teamKey}', ${idx})" title="${c.name}"
-                    class="w-5 h-5 rounded-full border-2 transition transform hover:scale-110 ${team.colorIndex === idx ? 'border-amber-400 scale-110 ring-2 ring-amber-400/40' : 'border-slate-600'}"
-                    style="background-color: ${c.bg};"></button>
-            `).join('') : `<span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-amber-300">${team.formation.split(' ')[0]}</span>`;
-
-            const teamHeaderTitleHtml = isAdminMode
-                ? `<input type="text" value="${team.name}" oninput="renameTeam('${teamKey}', this.value)"
-                    class="bg-slate-950/70 hover:bg-slate-950 focus:bg-slate-950 border border-transparent focus:border-amber-400 rounded-lg px-2.5 py-1 text-base sm:text-lg font-black text-white outline-none w-full transition">`
-                : `<h3 class="text-base sm:text-lg font-black text-white px-1">${team.name}</h3>`;
-
-            const formationControlHtml = isAdminMode
-                ? `<select onchange="applyFormation('${teamKey}', this.value)"
-                    class="bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-1.5 text-xs font-bold text-amber-300 outline-none cursor-pointer">
-                    ${formationOptionsHtml}
-                   </select>`
-                : `<span class="text-xs font-bold text-slate-400 flex items-center gap-1">
-                    <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-emerald-400"></i> التشكيلة المعتمدة
-                   </span>`;
-
-            const addSubBtnHtml = isAdminMode
-                ? `<button onclick="addSubPlayer('${teamKey}')" class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition">
-                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                    <span>إضافة احتياط</span>
-                   </button>`
-                : '';
-
-            wrapper.innerHTML = `
-                <!-- رأس بطاقة الفريق -->
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-slate-800">
-                    <div class="flex items-center gap-2.5 flex-1">
-                        <span class="w-4 h-8 rounded-full shrink-0" style="background-color: ${colorObj.bg}; border: 1px solid ${colorObj.border};"></span>
-                        ${teamHeaderTitleHtml}
-                    </div>
-
-                    <div class="flex items-center gap-1.5 justify-end">
-                        ${colorDotsHtml}
-                    </div>
-                </div>
-
-                <!-- شريط الخطة والإحصائيات -->
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                    ${formationControlHtml}
-
-                    <div class="flex items-center gap-2 text-xs text-slate-400">
-                        <span class="bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
-                            الأساسيين: <strong class="text-white">${team.players.length}</strong>
-                        </span>
-                        <span class="bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
-                            الاحتياط: <strong class="text-amber-400">${team.subs.length}</strong>
-                        </span>
-                    </div>
-                </div>
-
-                <!-- الملعب التفاعلي للفريق -->
-                <div id="pitch_${teamKey}" class="pitch-surface ${isAdminMode ? 'admin-pitch' : ''} w-full aspect-[4/4.6] sm:aspect-[4/4.3] select-none">
-                    <!-- خط المنتصف ودائرة المنتصف -->
-                    <div class="pitch-line absolute top-0 left-0 right-0 h-1/2 border-b-2"></div>
-                    <div class="pitch-line absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 sm:w-36 sm:h-36 rounded-full border-2"></div>
-                    <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-white/70"></div>
-
-                    <!-- منطقة الجزاء السفلية (مرمى الفريق) -->
-                    <div class="pitch-line absolute bottom-0 left-1/2 -translate-x-1/2 w-[58%] h-[22%] border-t-2 border-x-2"></div>
-                    <div class="pitch-line absolute bottom-0 left-1/2 -translate-x-1/2 w-[28%] h-[9%] border-t-2 border-x-2"></div>
-                    <div class="absolute bottom-[15%] left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-white/70"></div>
-
-                    <!-- قوس منطقة الجزاء -->
-                    <div class="pitch-line absolute bottom-[22%] left-1/2 -translate-x-1/2 translate-y-1/2 w-24 h-12 rounded-t-full border-t-2"></div>
-
-                    <!-- علامات الزوايا -->
-                    <div class="pitch-line absolute bottom-0 left-0 w-4 h-4 rounded-tr-full border-t-2 border-r-2"></div>
-                    <div class="pitch-line absolute bottom-0 right-0 w-4 h-4 rounded-tl-full border-t-2 border-l-2"></div>
-
-                    <!-- شارة اسم الفريق في خلفية العشب -->
-                    <div class="absolute top-6 left-1/2 -translate-x-1/2 text-white/15 font-black text-2xl sm:text-3xl tracking-wider pointer-events-none whitespace-nowrap">
-                        ${team.name}
-                    </div>
-
-                    <!-- اللاعبون على أرضية الملعب -->
-                    <div id="playersLayer_${teamKey}" class="absolute inset-0"></div>
-                </div>
-
-                <!-- دكة البدلاء (الاحتياط) -->
-                <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3">
-                    <div class="flex items-center justify-between mb-2.5">
-                        <h4 class="text-xs font-extrabold text-slate-300 flex items-center gap-1.5">
-                            <i data-lucide="users" class="w-4 h-4 text-amber-400"></i>
-                            <span>دكة البدلاء (الاحتياط)</span>
-                        </h4>
-                        ${addSubBtnHtml}
-                    </div>
-
-                    <div id="subsList_${teamKey}" class="space-y-1.5">
-                        ${renderSubsHtml(teamKey)}
-                    </div>
-                </div>
-            `;
-
-            const playersLayer = wrapper.querySelector(`#playersLayer_${teamKey}`);
-            team.players.forEach((player, index) => {
-                const token = createPlayerTokenElement(teamKey, player, index, colorObj);
-                playersLayer.appendChild(token);
-            });
-
-            return wrapper;
-        }
-
-        function createPlayerTokenElement(teamKey, player, index, colorObj) {
-            const el = document.createElement('div');
-            el.className = `player-token flex flex-col items-center group ${isAdminMode ? 'admin-draggable' : 'player-readonly'}`;
-            el.style.left = `${player.x}%`;
-            el.style.top = `${player.y}%`;
-            el.dataset.team = teamKey;
-            el.dataset.index = index;
-
-            const roleInfo = ROLE_LABELS[player.role] || ROLE_LABELS.MID;
-            const paidDotClass = player.paid ? 'bg-emerald-400 ring-2 ring-slate-950' : 'bg-slate-500 ring-2 ring-slate-950';
-
-            el.innerHTML = `
-                <div class="relative">
-                    <div class="player-jersey w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center font-black text-sm sm:text-base border-2"
-                        style="background-color: ${colorObj.bg}; border-color: ${colorObj.border}; color: ${colorObj.text};">
-                        ${player.number}
-                    </div>
-                    <span title="${player.paid ? 'دفع الحصة' : 'لم يدفع بعد'}" class="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full ${paidDotClass}"></span>
-                    <span class="absolute -bottom-1.5 left-1/2 -translate-x-1/2 text-[9px] font-extrabold px-1.5 py-0.2 rounded ${roleInfo.badge} shadow">
-                        ${player.role}
-                    </span>
-                </div>
-                <div class="mt-2 px-2 py-0.5 rounded-md bg-slate-950/90 border border-slate-700/80 text-[11px] sm:text-xs font-bold text-white shadow-md max-w-[88px] truncate text-center ${isAdminMode ? 'group-hover:border-amber-400' : ''} transition">
-                    ${player.name}
-                </div>
-            `;
-
-            if (isAdminMode) {
-                attachDragAndClickHandlers(el, teamKey, index);
-            }
-
-            return el;
-        }
-
-        function renderSubsHtml(teamKey) {
-            const team = appState.teams[teamKey];
-            if (team.subs.length === 0) {
-                return `<p class="text-xs text-slate-500 text-center py-2">لا يوجد لاعبين في الاحتياط حالياً</p>`;
-            }
-
-            return team.subs.map((sub, idx) => {
-                const roleInfo = ROLE_LABELS[sub.role] || ROLE_LABELS.MID;
-                const adminButtonsHtml = isAdminMode ? `
-                    <button onclick="toggleSubPaid('${teamKey}', ${idx})" title="تغيير حالة الدفع"
-                        class="px-2 py-1 rounded text-[10px] font-bold transition ${sub.paid ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-slate-800 text-slate-400 border border-slate-700'}">
-                        ${sub.paid ? 'مدفوع ✓' : 'غير مدفوع'}
-                    </button>
-
-                    <button onclick="quickSwapSubWithPitch('${teamKey}', ${idx})" title="إدخال للملعب (تبديل)"
-                        class="p-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 transition">
-                        <i data-lucide="arrow-up-down" class="w-3.5 h-3.5"></i>
-                    </button>
-
-                    <button onclick="openPlayerModal('${teamKey}', 'subs', ${idx})" title="تعديل"
-                        class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
-                        <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
-                    </button>
-                ` : `
-                    <span class="px-2 py-0.5 rounded text-[10px] font-bold ${sub.paid ? 'bg-emerald-500/15 text-emerald-400' : 'bg-slate-800 text-slate-400'}">
-                        ${sub.paid ? 'مدفوع ✓' : 'بانتظار الدفع'}
-                    </span>
-                `;
-
-                return `
-                    <div class="flex items-center justify-between bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 gap-2">
-                        <div class="flex items-center gap-2 min-w-0 flex-1 ${isAdminMode ? 'cursor-pointer' : ''}" ${isAdminMode ? `onclick="openPlayerModal('${teamKey}', 'subs', ${idx})"` : ''}>
-                            <span class="w-6 h-6 rounded-full bg-slate-800 text-amber-300 text-xs font-black flex items-center justify-center shrink-0 border border-slate-700">
-                                ${sub.number}
-                            </span>
-                            <span class="text-xs font-bold text-white truncate">${sub.name}</span>
-                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${roleInfo.badge}">${sub.role}</span>
-                        </div>
-
-                        <div class="flex items-center gap-1.5 shrink-0">
-                            ${adminButtonsHtml}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // ==========================================
-        // 8. نظام السحب والإفلات (وضع الإدارة فقط)
-        // ==========================================
-        function attachDragAndClickHandlers(element, teamKey, playerIndex) {
-            let startX = 0;
-            let startY = 0;
-            let hasMoved = false;
-
-            const onPointerDown = (e) => {
-                if (!isAdminMode) return;
-                if (e.button !== undefined && e.button !== 0) return;
-
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-                startX = clientX;
-                startY = clientY;
-                hasMoved = false;
-
-                const pitchEl = document.getElementById(`pitch_${teamKey}`);
-                const rect = pitchEl.getBoundingClientRect();
-
-                dragContext = {
-                    element,
-                    teamKey,
-                    playerIndex,
-                    pitchRect: rect
-                };
-
-                element.classList.add('dragging');
-            };
-
-            const onPointerMove = (e) => {
-                if (!dragContext || dragContext.element !== element) return;
-
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-                if (Math.abs(clientX - startX) > 4 || Math.abs(clientY - startY) > 4) {
-                    hasMoved = true;
-                }
-
-                if (!hasMoved) return;
-                if (e.cancelable) e.preventDefault();
-
-                const rect = dragContext.pitchRect;
-                let relX = ((clientX - rect.left) / rect.width) * 100;
-                let relY = ((clientY - rect.top) / rect.height) * 100;
-
-                relX = Math.max(8, Math.min(92, relX));
-                relY = Math.max(8, Math.min(93, relY));
-
-                element.style.left = `${relX}%`;
-                element.style.top = `${relY}%`;
-
-                const player = appState.teams[teamKey].players[playerIndex];
-                player.x = Math.round(relX * 10) / 10;
-                player.y = Math.round(relY * 10) / 10;
-            };
-
-            const onPointerUp = () => {
-                if (!dragContext || dragContext.element !== element) return;
-
-                element.classList.remove('dragging');
-                dragContext = null;
-
-                if (hasMoved) {
-                    triggerAutoSync();
-                } else {
-                    window.openPlayerModal(teamKey, 'players', playerIndex);
-                }
-            };
-
-            element.addEventListener('mousedown', onPointerDown);
-            window.addEventListener('mousemove', onPointerMove);
-            window.addEventListener('mouseup', onPointerUp);
-
-            element.addEventListener('touchstart', onPointerDown, { passive: false });
-            window.addEventListener('touchmove', onPointerMove, { passive: false });
-            window.addEventListener('touchend', onPointerUp);
-        }
-
-        // ==========================================
-        // 9. عمليات الإدارة (الفرق، الخطط، الاحتياط)
-        // ==========================================
-        window.renameTeam = function(teamKey, newName) {
-            if (!isAdminMode) return;
-            appState.teams[teamKey].name = newName || (teamKey === 'A' ? 'الفريق الأول' : 'الفريق الثاني');
-            triggerAutoSync();
-        };
-
-        window.changeTeamColor = function(teamKey, colorIndex) {
-            if (!isAdminMode) return;
-            appState.teams[teamKey].colorIndex = colorIndex;
-            renderAll();
-            triggerAutoSync();
-        };
-
-        window.applyFormation = function(teamKey, formationName) {
-            if (!isAdminMode) return;
-            const team = appState.teams[teamKey];
-            team.formation = formationName;
-            const coords = generateFormationCoords(appState.teamSize, formationName);
-
-            team.players.forEach((player, idx) => {
-                if (coords[idx]) {
-                    player.x = coords[idx].x;
-                    player.y = coords[idx].y;
-                    player.role = coords[idx].role;
-                }
-            });
-
-            renderAll();
-            triggerAutoSync();
-            showToast(`تم تطبيق خطة ${formationName} على ${team.name}`);
-        };
-
-        window.addSubPlayer = function(teamKey) {
-            if (!isAdminMode) return;
-            const team = appState.teams[teamKey];
-            const nextNum = team.players.length + team.subs.length + 1;
-            team.subs.push({
-                id: `${teamKey}_sub_${Date.now()}`,
-                name: `احتياط ${team.subs.length + 1}`,
-                number: nextNum,
-                role: 'MID',
-                paid: false
-            });
-            renderAll();
-            triggerAutoSync();
-            window.openPlayerModal(teamKey, 'subs', team.subs.length - 1);
-        };
-
-        window.toggleSubPaid = function(teamKey, subIndex) {
-            if (!isAdminMode) return;
-            const sub = appState.teams[teamKey].subs[subIndex];
-            if (sub) {
-                sub.paid = !sub.paid;
-                renderAll();
-                triggerAutoSync();
-            }
-        };
-
-        window.quickSwapSubWithPitch = function(teamKey, subIndex) {
-            if (!isAdminMode) return;
-            const team = appState.teams[teamKey];
-            const sub = team.subs[subIndex];
-            if (!sub || team.players.length === 0) return;
-
-            let targetIdx = team.players.findIndex(p => p.role === sub.role);
-            if (targetIdx === -1) {
-                targetIdx = team.players.findIndex(p => p.role !== 'GK');
-            }
-            if (targetIdx === -1) targetIdx = 0;
-
-            swapPlayers(teamKey, targetIdx, subIndex);
-        };
-
-        function swapPlayers(teamKey, starterIdx, subIdx) {
-            const team = appState.teams[teamKey];
-            const starter = team.players[starterIdx];
-            const sub = team.subs[subIdx];
-            if (!starter || !sub) return;
-
-            const posX = starter.x;
-            const posY = starter.y;
-
-            team.players[starterIdx] = {
-                id: sub.id,
-                name: sub.name,
-                number: sub.number,
-                role: sub.role,
-                x: posX,
-                y: posY,
-                paid: sub.paid
-            };
-
-            team.subs[subIdx] = {
-                id: starter.id,
-                name: starter.name,
-                number: starter.number,
-                role: starter.role,
-                paid: starter.paid
-            };
-
-            renderAll();
-            triggerAutoSync();
-            showToast(`تم تبديل ${sub.name} مكان ${starter.name}`);
-        }
-
-        // ==========================================
-        // 10. نافذة تعديل اللاعب (Modal Logic)
-        // ==========================================
-        window.openPlayerModal = function(teamKey, listType, index) {
-            if (!isAdminMode) return;
-            const player = appState.teams[teamKey][listType][index];
-            if (!player) return;
-
-            const normalizedRole = player.role === 'FWD' ? 'ATT' : player.role;
-
-            editingTarget = {
-                teamKey,
-                listType,
-                index,
-                tempRole: normalizedRole,
-                tempPaid: player.paid
-            };
-
-            document.getElementById('modalPlayerName').value = player.name;
-            document.getElementById('modalPlayerNumber').value = player.number;
-
-            updateModalRoleUI();
-            updateModalPaidUI();
-
-            const swapSection = document.getElementById('modalSwapSection');
-            const subOptions = document.getElementById('modalSubOptions');
-            const deleteBtn = document.getElementById('modalDeleteSubBtn');
-
-            if (listType === 'players' && appState.teams[teamKey].subs.length > 0) {
-                swapSection.classList.remove('hidden');
-                subOptions.innerHTML = appState.teams[teamKey].subs.map((s, sIdx) => `
-                    <button type="button" onclick="executeModalSwap(${sIdx})"
-                        class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-amber-500/20 text-slate-200 hover:text-amber-300 border border-slate-700 hover:border-amber-400 text-xs font-bold flex items-center gap-1 transition">
-                        <i data-lucide="repeat" class="w-3 h-3"></i>
-                        <span>${s.name} (#${s.number})</span>
-                    </button>
-                `).join('');
-            } else {
-                swapSection.classList.add('hidden');
-            }
-
-            if (listType === 'subs') {
-                deleteBtn.classList.remove('hidden');
-            } else {
-                deleteBtn.classList.add('hidden');
-            }
-
-            const modal = document.getElementById('playerModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            lucide.createIcons();
-        };
-
-        window.closePlayerModal = function() {
-            const modal = document.getElementById('playerModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            editingTarget = null;
-        };
-
-        window.selectModalRole = function(role) {
-            if (!editingTarget) return;
-            editingTarget.tempRole = role;
-            updateModalRoleUI();
-        };
-
-        function updateModalRoleUI() {
-            document.querySelectorAll('.modal-role-btn').forEach(btn => {
-                const r = btn.getAttribute('data-role');
-                if (r === editingTarget.tempRole) {
-                    btn.className = 'modal-role-btn py-2 rounded-xl text-xs font-extrabold border-2 border-amber-400 bg-amber-500/20 text-amber-300';
-                } else {
-                    btn.className = 'modal-role-btn py-2 rounded-xl text-xs font-extrabold border border-slate-700 bg-slate-950 text-slate-400 hover:text-white';
-                }
-            });
-        }
-
-        window.toggleModalPaid = function() {
-            if (!editingTarget) return;
-            editingTarget.tempPaid = !editingTarget.tempPaid;
-            updateModalPaidUI();
-        };
-
-        function updateModalPaidUI() {
-            const btn = document.getElementById('modalPaidToggle');
-            if (editingTarget.tempPaid) {
-                btn.className = 'px-4 py-2 rounded-xl text-xs font-extrabold bg-emerald-600 text-white shadow-md transition';
-                btn.textContent = 'مدفوع ✓';
-            } else {
-                btn.className = 'px-4 py-2 rounded-xl text-xs font-extrabold bg-slate-800 text-slate-300 border border-slate-700 transition';
-                btn.textContent = 'غير مدفوع ✕';
-            }
-        }
-
-        window.savePlayerModal = function() {
-            if (!editingTarget) return;
-            const { teamKey, listType, index, tempRole, tempPaid } = editingTarget;
-            const player = appState.teams[teamKey][listType][index];
-
-            const newName = document.getElementById('modalPlayerName').value.trim();
-            const newNum = parseInt(document.getElementById('modalPlayerNumber').value) || player.number;
-
-            if (newName) player.name = newName;
-            player.number = Math.max(1, Math.min(99, newNum));
-            player.role = tempRole;
-            player.paid = tempPaid;
-
-            renderAll();
-            closePlayerModal();
-            triggerAutoSync();
-        };
-
-        window.executeModalSwap = function(subIdx) {
-            if (!editingTarget || editingTarget.listType !== 'players') return;
-            const { teamKey, index } = editingTarget;
-            window.closePlayerModal();
-            swapPlayers(teamKey, index, subIdx);
-        };
-
-        window.deleteCurrentSub = function() {
-            if (!editingTarget || editingTarget.listType !== 'subs') return;
-            const { teamKey, index } = editingTarget;
-            appState.teams[teamKey].subs.splice(index, 1);
-            renderAll();
-            window.closePlayerModal();
-            triggerAutoSync();
-            showToast('تم حذف اللاعب من قائمة الاحتياط');
-        };
-
-        // ==========================================
-        // 11. القرعة العشوائية، التصفير، والمشاركة
-        // ==========================================
-        window.shuffleTeams = function() {
-            if (!isAdminMode) return;
-            const gks = [appState.teams.A.players[0], appState.teams.B.players[0]];
-            const outfieldPool = [
-                ...appState.teams.A.players.slice(1),
-                ...appState.teams.B.players.slice(1)
-            ];
-
-            for (let i = outfieldPool.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [outfieldPool[i], outfieldPool[j]] = [outfieldPool[j], outfieldPool[i]];
-            }
-
-            if (Math.random() > 0.5) {
-                [gks[0], gks[1]] = [gks[1], gks[0]];
-            }
-
-            const half = Math.floor(outfieldPool.length / 2);
-            const newOutfieldA = outfieldPool.slice(0, half);
-            const newOutfieldB = outfieldPool.slice(half);
-
-            const applyNamesToTeam = (teamKey, gkObj, list) => {
-                const team = appState.teams[teamKey];
-                team.players[0].name = gkObj.name;
-                team.players[0].paid = gkObj.paid;
-
-                list.forEach((p, idx) => {
-                    if (team.players[idx + 1]) {
-                        team.players[idx + 1].name = p.name;
-                        team.players[idx + 1].paid = p.paid;
-                    }
-                });
-            };
-
-            applyNamesToTeam('A', gks[0], newOutfieldA);
-            applyNamesToTeam('B', gks[1], newOutfieldB);
-
-            renderAll();
-            triggerAutoSync();
-            showToast('تمت القرعة وإعادة توزيع اللاعبين بشكل متوازن!');
-        };
-
-        window.openResetConfirm = function() {
-            if (!isAdminMode) return;
-            const modal = document.getElementById('resetModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        };
-
-        window.closeResetConfirm = function() {
-            const modal = document.getElementById('resetModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        };
-
-        window.confirmReset = function() {
-            window.closeResetConfirm();
-            resetToDefaultState();
-            renderAll();
-            triggerAutoSync();
-            showToast('تمت إعادة ضبط التشكيلة ومزامنتها');
-        };
-
-        window.shareMatchSummary = function() {
-            const startersCount = appState.teams.A.players.length + appState.teams.B.players.length;
-            const subsCount = appState.teams.A.subs.length + appState.teams.B.subs.length;
-            const totalEligible = appState.includeSubsInPrice ? (startersCount + subsCount) : startersCount;
-            const exactCost = totalEligible > 0 ? (appState.pitchPrice / totalEligible) : 0;
-            const roundedIQD = exactCost > 0 ? Math.ceil(exactCost / 250) * 250 : 0;
-
-            const formatTeamText = (team) => {
-                let txt = `⚽ *${team.name}* (${team.formation.split(' ')[0]}):\n`;
-                team.players.forEach(p => {
-                    const paidIcon = p.paid ? '✅' : '⏳';
-                    txt += `  • [${p.role}] ${p.name} (#${p.number}) ${paidIcon}\n`;
-                });
-                if (team.subs.length > 0) {
-                    txt += `  🔄 *الاحتياط:* ${team.subs.map(s => `${s.name} ${s.paid ? '✅' : ''}`).join('، ')}\n`;
-                }
-                return txt;
-            };
-
-            let summary = `🏆 *تشكيلة وحساب المباراة - تطبيق مُدَرِّبِي* 🏆\n`;
-            summary += `━━━━━━━━━━━━━━━━━━━━\n`;
-            if (appState.venue) summary += `🏟️ *الملعب:* ${appState.venue}\n`;
-            if (appState.matchTime) summary += `⏰ *الوقت:* ${appState.matchTime}\n`;
-            if (appState.referee) summary += `🏁 *الحكم:* ${appState.referee}\n`;
-            summary += `👥 *النظام:* ${appState.teamSize} ضد ${appState.teamSize}\n`;
-            summary += `💰 *سعر الحجز الكلي:* ${appState.pitchPrice.toLocaleString('en-US')} د.ع\n`;
-            summary += `💵 *حصة اللاعب الواحد:* ${roundedIQD.toLocaleString('en-US')} د.ع (${totalEligible} لاعب)\n`;
-            summary += `━━━━━━━━━━━━━━━━━━━━\n\n`;
-            summary += formatTeamText(appState.teams.A) + `\n`;
-            summary += formatTeamText(appState.teams.B);
-            summary += `\n✅ = تم الدفع | ⏳ = بانتظار الدفع`;
-
-            const textArea = document.createElement('textarea');
-            textArea.value = summary;
-            textArea.style.position = 'fixed';
-            textArea.style.left = '-9999px';
-            document.body.appendChild(textArea);
-            textArea.select();
+            const email = document.getElementById("loginEmail").value.trim();
+            const pass = document.getElementById("loginPassword").value;
             try {
-                document.execCommand('copy');
-                showToast('تم نسخ ملخص التشكيلة والحساب! جاهز للصق في واتساب 📋');
-            } catch (err) {
-                showToast('حدث خطأ أثناء النسخ');
+                await signInWithEmailAndPassword(auth, email, pass);
+                closeAdminLogin();
+            } catch (_) {
+                document.getElementById("loginErr").classList.remove("hidden");
             }
-            document.body.removeChild(textArea);
         };
 
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toastMessage').textContent = msg;
-            toast.classList.remove('hidden');
-            toast.classList.add('flex');
+        window.logoutAdmin = async () => {
+            await signOut(auth);
+        };
 
-            clearTimeout(window._toastTimer);
-            window._toastTimer = setTimeout(() => {
-                toast.classList.add('hidden');
-                toast.classList.remove('flex');
-            }, 3200);
-        }
+        window.saveMatchAdmin = async () => {
+            if (!isAdmin) return;
+            const updated = {
+                ...currentMatch,
+                venue: document.getElementById("inpVenue").value.trim(),
+                referee: document.getElementById("inpReferee").value.trim(),
+                matchDate: document.getElementById("inpDate").value,
+                matchClock: document.getElementById("inpTime").value,
+                hasActiveMatch: document.getElementById("inpActive").checked,
+                updatedAt: Date.now()
+            };
+            await setDoc(matchDocRef, updated);
+        };
 
-        // بدء التشغيل عند تحميل الصفحة
-        window.addEventListener('DOMContentLoaded', initFirebaseAndSync);
+        renderMatchUI();
+        lucide.createIcons();
     </script>
 </body>
 </html>

@@ -1,0 +1,6 @@
+# أزل التعليق عن السطر التالي إذا أردت استبعاد firebase-config.js عند الرفع لـ GitHub
+# firebase-config.js
+.env
+.env.local
+.DS_Store
+Thumbs.db
