@@ -1,5 +1,4 @@
 // إعدادات مشروع Firebase الخاص بك (pollwap)
-// ملاحظة: ملف firebase-config.js مضاف إلى .gitignore حتى لا يُرفع إلى GitHub إذا رغبت بإخفائه
 
 export const firebaseConfig = {
   apiKey: "AIzaSyAIIFTqqXgMeD7dM8iu-NxHkLUnLyapVL8",
