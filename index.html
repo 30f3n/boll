@@ -12,7 +12,6 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        /* تنسيقات أساسية مدمجة لضمان بقاء التصميم متماسكاً حتى بدون إنترنت أو CDN */
         *, *::before, *::after { box-sizing: border-box; }
         html, body { margin: 0; padding: 0; }
         body {
@@ -26,7 +25,6 @@
         button, input, select { font-family: inherit; }
         button { cursor: pointer; border: none; background: transparent; color: inherit; }
 
-        /* أدوات تخطيط وعرض احتياطية متكاملة */
         .hidden { display: none !important; }
         .flex { display: flex; }
         .grid { display: grid; }
@@ -107,6 +105,7 @@
         .p-4 { padding: 1rem; }
         .p-5 { padding: 1.25rem; }
         .p-6 { padding: 1.5rem; }
+        .p-8 { padding: 2rem; }
         .px-1\.5 { padding-left: 0.375rem; padding-right: 0.375rem; }
         .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
         .px-2\.5 { padding-left: 0.625rem; padding-right: 0.625rem; }
@@ -121,7 +120,6 @@
         .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
         .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
         .py-5 { padding-top: 1.25rem; padding-bottom: 1.25rem; }
-        .py-8 { padding-top: 2rem; padding-bottom: 2rem; }
         .pb-3 { padding-bottom: 0.75rem; }
         .pb-4 { padding-bottom: 1rem; }
         .pt-2 { padding-top: 0.5rem; }
@@ -189,6 +187,7 @@
         .tracking-widest { letter-spacing: 0.1em; }
 
         .bg-slate-950 { background-color: #020617; }
+        .bg-slate-950\/60 { background-color: rgba(2, 6, 23, 0.6); }
         .bg-slate-950\/70 { background-color: rgba(2, 6, 23, 0.7); }
         .bg-slate-950\/80 { background-color: rgba(2, 6, 23, 0.8); }
         .bg-slate-950\/90 { background-color: rgba(2, 6, 23, 0.9); }
@@ -213,9 +212,9 @@
         .bg-rose-500\/15 { background-color: rgba(244, 63, 94, 0.15); }
         .bg-rose-500\/20 { background-color: rgba(244, 63, 94, 0.2); }
         .bg-sky-500 { background-color: #0ea5e9; }
+        .bg-sky-500\/15 { background-color: rgba(14, 165, 233, 0.15); }
         .bg-black\/75 { background-color: rgba(0, 0, 0, 0.75); }
         .bg-black\/80 { background-color: rgba(0, 0, 0, 0.8); }
-        .bg-black\/90 { background-color: rgba(0, 0, 0, 0.9); }
 
         .bg-gradient-to-br { background-image: linear-gradient(to bottom right, var(--tw-gradient-from), var(--tw-gradient-to)); }
         .bg-gradient-to-l { background-image: linear-gradient(to left, var(--tw-gradient-from), var(--tw-gradient-to)); }
@@ -246,6 +245,7 @@
         .text-amber-400 { color: #fbbf24; }
         .text-rose-300 { color: #fda4af; }
         .text-rose-400 { color: #fb7185; }
+        .text-sky-300 { color: #7dd3fc; }
         .text-sky-400 { color: #38bdf8; }
 
         .border { border: 1px solid #1e293b; }
@@ -276,6 +276,7 @@
         .border-amber-400\/50 { border-color: rgba(251, 191, 36, 0.5); }
         .border-rose-800 { border-color: #9f1239; }
         .border-rose-500\/30 { border-color: rgba(244, 63, 94, 0.3); }
+        .border-sky-500\/30 { border-color: rgba(14, 165, 233, 0.3); }
 
         .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4); }
         .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); }
@@ -286,13 +287,8 @@
         .outline-none { outline: none; }
         .pointer-events-none { pointer-events: none; }
 
-        input, select {
-            color: #ffffff;
-        }
-        input[type="date"] {
-            color-scheme: dark;
-            min-height: 36px;
-        }
+        input, select { color: #ffffff; }
+        input[type="date"] { color-scheme: dark; min-height: 36px; }
 
         @media (min-width: 640px) {
             .sm\:flex-row { flex-direction: row; }
@@ -313,14 +309,15 @@
         @media (min-width: 768px) {
             .md\:inline { display: inline; }
             .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         }
 
         @media (min-width: 1024px) {
             .lg\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
             .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
         }
 
-        /* شاشة التحميل المظللة الأولية والكرة المرتدة */
         #loadingOverlay {
             position: fixed;
             inset: 0;
@@ -361,34 +358,13 @@
         }
 
         @keyframes shuttleBounce {
-            0% {
-                left: 6px;
-                bottom: 2px;
-                transform: rotate(0deg) scaleX(1.08) scaleY(0.92);
-            }
-            25% {
-                left: 52px;
-                bottom: 44px;
-                transform: rotate(110deg) scaleX(0.96) scaleY(1.04);
-            }
-            50% {
-                left: 98px;
-                bottom: 4px;
-                transform: rotate(220deg) scaleX(1.08) scaleY(0.92);
-            }
-            75% {
-                left: 146px;
-                bottom: 46px;
-                transform: rotate(330deg) scaleX(0.96) scaleY(1.04);
-            }
-            100% {
-                left: 190px;
-                bottom: 2px;
-                transform: rotate(440deg) scaleX(1.08) scaleY(0.92);
-            }
+            0% { left: 6px; bottom: 2px; transform: rotate(0deg) scaleX(1.08) scaleY(0.92); }
+            25% { left: 52px; bottom: 44px; transform: rotate(110deg) scaleX(0.96) scaleY(1.04); }
+            50% { left: 98px; bottom: 4px; transform: rotate(220deg) scaleX(1.08) scaleY(0.92); }
+            75% { left: 146px; bottom: 46px; transform: rotate(330deg) scaleX(0.96) scaleY(1.04); }
+            100% { left: 190px; bottom: 2px; transform: rotate(440deg) scaleX(1.08) scaleY(0.92); }
         }
 
-        /* تصميم عشب الملعب الاحترافي مع خطوط التكتيك */
         .pitch-surface {
             background: repeating-linear-gradient(
                 0deg,
@@ -441,7 +417,6 @@
 </head>
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100">
 
-    <!-- شاشة التحميل المظللة الأولية بالكرة المرتدة -->
     <div id="loadingOverlay">
         <div class="ball-track">
             <div class="bouncing-ball">
@@ -452,7 +427,6 @@
         <div id="loadingSubText" class="text-xs text-slate-400 mt-1">يرجى الانتظار لحين مطابقة بيانات المباريات</div>
     </div>
 
-    <!-- شريط حالة وضع الإدارة العلوي -->
     <div id="adminBanner" class="hidden bg-gradient-to-l from-amber-600 via-amber-500 to-yellow-500 text-slate-950 px-4 py-2 text-xs sm:text-sm font-black shadow-md">
         <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2">
@@ -472,7 +446,6 @@
         </div>
     </div>
 
-    <!-- الشريط العلوي -->
     <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-lg">
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
             <div class="flex items-center gap-3">
@@ -528,48 +501,45 @@
         </div>
     </header>
 
-    <!-- المحتوى الرئيسي -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-4 py-5 space-y-6">
 
-        <!-- شريط قوائم المباريات وفحص التاريخ -->
+        <!-- قائمة اختيار اللعبة / التاريخ -->
         <section class="bg-slate-900/95 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-4">
             <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800">
                 <div class="flex items-center gap-2">
                     <i data-lucide="calendar-days" class="w-5 h-5 text-amber-400"></i>
                     <div>
-                        <h2 class="text-base sm:text-lg font-black text-white">قائمة المباريات والخطط حسب التاريخ</h2>
-                        <p class="text-xs text-slate-400">اختر مباراة من القائمة أو ابحث بتاريخ معين لعرض خطتها</p>
+                        <h2 class="text-base sm:text-lg font-black text-white">اختر اللعبة لعرض التشكيلة والمعلومات</h2>
+                        <p class="text-xs text-slate-400">لن تظهر الخطة والمعلومات إلا بعد اختيار لعبة (سواء كانت قادمة أو انتهت)</p>
                     </div>
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2">
-                    <label for="playerDateFilter" class="text-xs font-bold text-slate-300">فحص تاريخ:</label>
+                    <label for="playerDateFilter" class="text-xs font-bold text-slate-300">بحث بتاريخ:</label>
                     <input type="date" id="playerDateFilter" onchange="handleDateFilterChange(this.value)"
                         class="bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-1.5 text-xs font-bold text-white outline-none">
                     <button id="clearDateFilterBtn" onclick="clearDateFilter()" class="hidden px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-bold border border-slate-700">
-                        عرض الكل
+                        إلغاء الفلتر
                     </button>
                 </div>
             </div>
 
-            <div id="matchesListContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                <!-- يتم توليد قوائم المباريات هنا -->
-            </div>
+            <div id="matchesListContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
         </section>
 
-        <!-- رسالة عند عدم وجود لعبة في التاريخ المحدد أو عدم وجود مباريات -->
-        <div id="noMatchStateBox" class="hidden bg-slate-900/90 border border-slate-800 rounded-2xl p-8 text-center space-y-3">
-            <div class="w-12 h-12 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center mx-auto">
-                <i data-lucide="calendar-x" class="w-6 h-6"></i>
+        <!-- رسالة عند عدم اختيار لعبة أو عدم وجود لعبة -->
+        <div id="noMatchStateBox" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-8 text-center space-y-2">
+            <div class="w-12 h-12 rounded-full bg-slate-800 text-amber-400 flex items-center justify-center mx-auto mb-2">
+                <i data-lucide="mouse-pointer-click" class="w-6 h-6"></i>
             </div>
-            <div id="noMatchMainText" class="text-xl font-black text-white">لا يوجد</div>
-            <p id="noMatchSubText" class="text-xs text-slate-400">لا توجد لعبة مسجلة في هذا التاريخ حالياً.</p>
+            <div id="noMatchMainText" class="text-xl font-black text-white">اختر لعبة من القائمة لعرض التشكيلة والمعلومات</div>
+            <p id="noMatchSubText" class="text-xs text-slate-400">اضغط على أي لعبة متوفرة في القائمة بالأعلى لإظهار تفاصيلها وتشكيلتها.</p>
         </div>
 
-        <!-- محتوى المباراة النشطة / المختارة -->
-        <div id="activeMatchWorkspace" class="space-y-6">
+        <!-- محتوى المباراة المختارة فقط -->
+        <div id="activeMatchWorkspace" class="hidden space-y-6">
 
-            <!-- بطاقة عرض تفاصيل الحجز للاعبين -->
+            <!-- بطاقة معلومات المباراة للاعبين -->
             <section id="playerViewSummary" class="bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl">
                 <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-800/80">
                     <div class="flex items-center gap-2.5">
@@ -578,10 +548,10 @@
                         </div>
                         <div>
                             <div class="flex flex-wrap items-center gap-2">
-                                <h2 id="pvMatchTitle" class="text-base sm:text-xl font-black text-white">لعبة يوم الخميس 2026/11/7</h2>
-                                <span id="pvMatchStatusBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">نشطة</span>
+                                <h2 id="pvMatchTitle" class="text-base sm:text-xl font-black text-white">لعبة يوم السبت 2026/11/3</h2>
+                                <span id="pvMatchStatusBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-sky-500/15 text-sky-300 border border-sky-500/30">قادمة</span>
                             </div>
-                            <p class="text-xs text-slate-400">الخطة والحسابات الخاصة بالمباراة المحددة</p>
+                            <p class="text-xs text-slate-400">معلومات وتشكيلة اللعبة المختارة</p>
                         </div>
                     </div>
                     <span id="playerFormatBadge" class="px-3 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-extrabold">
@@ -596,7 +566,7 @@
                         </span>
                         <div>
                             <div id="pvVenue" class="text-sm sm:text-base font-black text-white truncate">ملعب الأبطال الخماسي</div>
-                            <div id="pvTime" class="text-xs font-bold text-amber-400 mt-0.5">الخميس 9:00 مساءً</div>
+                            <div id="pvTime" class="text-xs font-bold text-amber-400 mt-0.5">9:00 مساءً</div>
                         </div>
                     </div>
 
@@ -637,13 +607,13 @@
                 </div>
             </section>
 
-            <!-- لوحة تحكم الإدارة للمباراة المحددة -->
+            <!-- لوحة تحكم الإدارة للمباراة المختارة -->
             <section id="adminControlPanel" class="hidden bg-slate-900/90 border border-amber-500/30 rounded-2xl p-4 sm:p-5 shadow-xl">
                 <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-800/80">
                     <div class="flex flex-wrap items-center gap-2">
                         <i data-lucide="sliders-horizontal" class="w-5 h-5 text-amber-400"></i>
                         <h2 class="text-base sm:text-lg font-extrabold text-white">إعدادات المباراة المحددة والحساب المالي</h2>
-                        <span id="adminMatchFinishedBadge" class="hidden px-2.5 py-0.5 rounded-full text-xs font-black bg-rose-500/20 text-rose-300 border border-rose-500/30">انتهت</span>
+                        <span id="adminMatchStatusPill" class="px-2.5 py-0.5 rounded-full text-xs font-black bg-sky-500/15 text-sky-300 border border-sky-500/30">قادمة</span>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
                         <button onclick="toggleMatchFinished()" id="toggleFinishedBtn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 text-xs font-extrabold transition">
@@ -658,7 +628,6 @@
                     </div>
                 </div>
 
-                <!-- صف بيانات تاريخ وعنوان المباراة -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
                     <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3">
                         <label class="text-xs font-bold text-slate-400 mb-1 block">تاريخ المباراة</label>
@@ -667,13 +636,13 @@
                     </div>
 
                     <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3">
-                        <label class="text-xs font-bold text-slate-400 mb-1 block">اليوم والتاريخ الظاهر للاعبين</label>
-                        <div id="matchAutoLabelPreview" class="text-xs sm:text-sm font-black text-amber-300 py-1.5 truncate">لعبة يوم الخميس 2026/11/7</div>
+                        <label class="text-xs font-bold text-slate-400 mb-1 block">اليوم والتاريخ الظاهر</label>
+                        <div id="matchAutoLabelPreview" class="text-xs sm:text-sm font-black text-amber-300 py-1.5 truncate">لعبة يوم السبت 2026/11/3</div>
                     </div>
 
                     <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3">
                         <label class="text-xs font-bold text-slate-400 mb-1 block">عنوان/وصف إضافي (اختياري)</label>
-                        <input type="text" id="matchCustomTitleInput" placeholder="مثال: ودية الخميس الليلية" oninput="updateMatchCustomTitle(this.value)"
+                        <input type="text" id="matchCustomTitleInput" placeholder="مثال: ودية المساء" oninput="updateMatchCustomTitle(this.value)"
                             class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-lg px-3 py-1.5 text-xs sm:text-sm text-white outline-none">
                     </div>
                 </div>
@@ -760,11 +729,10 @@
                 </div>
             </section>
 
-            <!-- شريط التوضيح التفاعلي -->
             <div id="instructionBanner" class="bg-slate-900/90 border border-slate-800 rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-300">
                 <div class="flex items-center gap-2" id="instructionText">
                     <i data-lucide="eye" class="w-4 h-4 text-emerald-400 shrink-0"></i>
-                    <span>أنت تشاهد الآن <strong>نسخة اللاعبين المباشرة</strong>. لتعديل التشكيلة أو الأسماء، اضغط على زر <strong>"تسجيل دخول الإدارة"</strong> في الأعلى.</span>
+                    <span>أنت تشاهد الآن <strong>نسخة اللاعبين المباشرة</strong> للعبة المختارة.</span>
                 </div>
                 <div class="flex items-center gap-3 text-[11px]">
                     <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> مدفوع</span>
@@ -772,12 +740,10 @@
                 </div>
             </div>
 
-            <!-- الملاعب التفاعلية -->
             <section class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="pitchesContainer"></section>
         </div>
     </main>
 
-    <!-- التذييل -->
     <footer class="bg-slate-900 border-t border-slate-800 py-4 px-4 text-center text-xs text-slate-400 mt-8">
         <p>تطبيق <strong class="text-amber-400">مُدَرِّبِي</strong> — منصة إدارة التشكيلات والحجوزات والمباريات المتعددة.</p>
     </footer>
@@ -804,8 +770,16 @@
                 </div>
 
                 <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1.5">حالة اللعبة عند الإنشاء</label>
+                    <select id="newMatchStatusInput" class="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2 text-xs font-bold text-white outline-none">
+                        <option value="upcoming" selected>قادمة</option>
+                        <option value="finished">انتهت</option>
+                    </select>
+                </div>
+
+                <div>
                     <label class="block text-xs font-bold text-slate-300 mb-1.5">عنوان إضافي (اختياري)</label>
-                    <input type="text" id="newMatchTitleInput" placeholder="مثال: مباراة الخميس الليلية"
+                    <input type="text" id="newMatchTitleInput" placeholder="مثال: ودية المساء"
                         class="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2 text-sm text-white outline-none">
                 </div>
 
@@ -834,7 +808,6 @@
         </div>
     </div>
 
-    <!-- نافذة تسجيل دخول الإدارة -->
     <div id="loginModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm p-6 shadow-2xl">
             <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
@@ -868,7 +841,6 @@
         </div>
     </div>
 
-    <!-- نافذة تغيير كلمة مرور الإدارة -->
     <div id="changePasswordModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm p-6 shadow-2xl">
             <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
@@ -896,7 +868,6 @@
         </div>
     </div>
 
-    <!-- نافذة تعديل بيانات اللاعب -->
     <div id="playerModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-5 shadow-2xl">
             <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
@@ -961,7 +932,6 @@
         </div>
     </div>
 
-    <!-- نافذة تأكيد التصفير -->
     <div id="resetModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm p-5 shadow-2xl text-center">
             <div class="w-12 h-12 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto mb-3">
@@ -976,7 +946,6 @@
         </div>
     </div>
 
-    <!-- إشعار منبثق -->
     <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden items-center gap-2 bg-slate-900 border border-emerald-500/60 text-white px-4 py-3 rounded-2xl shadow-2xl text-xs sm:text-sm font-bold">
         <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
         <span id="toastMessage">تم الحفظ بنجاح!</span>
@@ -1091,9 +1060,10 @@
         let selectedDateFilter = '';
         let initialSyncDone = false;
 
+        // لا يتم إظهار التشكيلة والمعلومات إلا بعد اختيار لعبة (activeMatchId غير فارغ)
         let appState = {
             adminPassword: '1234',
-            activeMatchId: 'match_default_1',
+            activeMatchId: '',
             matches: []
         };
 
@@ -1101,16 +1071,16 @@
         let editingTarget = null;
 
         function formatSlashDate(isoDateStr) {
-            if (!isoDateStr || !/^\d{4}-\d{2}-\d{2}$/.test(isoDateStr)) return '2026/11/7';
+            if (!isoDateStr || !/^\d{4}-\d{2}-\d{2}$/.test(isoDateStr)) return '2026/11/3';
             const [y, m, d] = isoDateStr.split('-');
             return `${y}/${parseInt(m, 10)}/${parseInt(d, 10)}`;
         }
 
         function getDayArabicName(isoDateStr) {
-            if (!isoDateStr || !/^\d{4}-\d{2}-\d{2}$/.test(isoDateStr)) return 'الخميس';
+            if (!isoDateStr || !/^\d{4}-\d{2}-\d{2}$/.test(isoDateStr)) return 'السبت';
             const [y, m, d] = isoDateStr.split('-').map(n => parseInt(n, 10));
             const dt = new Date(y, m - 1, d);
-            return ARABIC_DAYS[dt.getDay()] || 'الخميس';
+            return ARABIC_DAYS[dt.getDay()] || 'السبت';
         }
 
         function buildMatchDayDateLabel(match) {
@@ -1171,7 +1141,7 @@
             const defaultForm = FORMATIONS_DB[teamSize] ? Object.keys(FORMATIONS_DB[teamSize])[0] : 'تشكيلة مخصصة';
             return {
                 id: id || `match_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-                date: date || '2026-11-07',
+                date: date || '2026-11-03',
                 customTitle,
                 finished,
                 teamSize,
@@ -1201,35 +1171,34 @@
 
         function seedInitialMatches() {
             const m1 = createMatchRecord({
-                id: 'match_default_1',
-                date: '2026-11-07',
+                id: 'match_sat_2026_11_03',
+                date: '2026-11-03',
                 customTitle: '',
                 teamSize: 7,
                 pitchPrice: 20000,
                 finished: false
             });
             appState.matches = [m1];
-            appState.activeMatchId = m1.id;
+            appState.activeMatchId = '';
         }
 
         function getActiveMatch() {
-            if (!Array.isArray(appState.matches) || appState.matches.length === 0) return null;
-            const found = appState.matches.find(m => m.id === appState.activeMatchId);
-            return found || appState.matches[0];
+            if (!Array.isArray(appState.matches) || !appState.activeMatchId) return null;
+            return appState.matches.find(m => m.id === appState.activeMatchId) || null;
         }
 
         function normalizeCloudData(cloudData) {
             if (Array.isArray(cloudData.matches) && cloudData.matches.length > 0) {
                 return {
                     adminPassword: cloudData.adminPassword || '1234',
-                    activeMatchId: cloudData.activeMatchId || cloudData.matches[0].id,
+                    activeMatchId: '',
                     matches: cloudData.matches
                 };
             }
             if (cloudData.teams) {
                 const migrated = createMatchRecord({
                     id: 'match_migrated_1',
-                    date: '2026-11-07',
+                    date: '2026-11-03',
                     customTitle: '',
                     teamSize: cloudData.teamSize || 7,
                     pitchPrice: cloudData.pitchPrice ?? 20000,
@@ -1242,7 +1211,7 @@
                 migrated.teams = cloudData.teams;
                 return {
                     adminPassword: cloudData.adminPassword || '1234',
-                    activeMatchId: migrated.id,
+                    activeMatchId: '',
                     matches: [migrated]
                 };
             }
@@ -1291,7 +1260,11 @@
                     if (snapshot.exists()) {
                         const normalized = normalizeCloudData(snapshot.data());
                         if (normalized && !dragContext) {
+                            const prevSelectedId = appState.activeMatchId;
                             appState = normalized;
+                            if (prevSelectedId && appState.matches.some(m => m.id === prevSelectedId)) {
+                                appState.activeMatchId = prevSelectedId;
+                            }
                             if (isAdminMode) syncAdminInputs();
                             renderAll();
                         }
@@ -1326,9 +1299,7 @@
 
         window.syncToCloud = async function(showNotification = false) {
             const indicator = document.getElementById('saveIndicator');
-            if (indicator) {
-                indicator.innerHTML = `<span>جاري المزامنة...</span>`;
-            }
+            if (indicator) indicator.innerHTML = `<span>جاري المزامنة...</span>`;
 
             if (isCloudConnected && db && currentUser && matchDocRef) {
                 try {
@@ -1361,7 +1332,6 @@
             }, 450);
         }
 
-        // إدارة قائمة المباريات والبحث بالتاريخ
         function renderMatchesList() {
             const container = document.getElementById('matchesListContainer');
             const noMatchBox = document.getElementById('noMatchStateBox');
@@ -1383,15 +1353,11 @@
                 return;
             }
 
-            noMatchBox.classList.add('hidden');
-            workspace.classList.remove('hidden');
-
-            const activeMatch = getActiveMatch();
             container.innerHTML = filteredMatches.map(m => {
-                const isSelected = activeMatch && activeMatch.id === m.id;
+                const isSelected = appState.activeMatchId === m.id;
                 const statusBadge = m.finished
                     ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/30">انتهت</span>`
-                    : `<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">نشطة</span>`;
+                    : `<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-sky-500/15 text-sky-300 border border-sky-500/30">قادمة</span>`;
 
                 return `
                     <div onclick="selectMatch('${m.id}')" class="cursor-pointer rounded-xl p-3.5 border transition flex flex-col justify-between gap-2 ${isSelected ? 'bg-slate-950 border-amber-400 shadow-lg' : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'}">
@@ -1403,12 +1369,23 @@
                             ${statusBadge}
                         </div>
                         <div class="flex items-center justify-between text-[11px] pt-2 border-t border-slate-800/80">
-                            <span class="text-amber-300 font-bold">${isSelected ? 'المعروضة حالياً' : 'اضغط لعرض الخطة'}</span>
+                            <span class="text-amber-300 font-bold">${isSelected ? 'تم الاختيار (معروضة)' : 'اضغط لعرض التشكيلة والمعلومات'}</span>
                             <span class="text-slate-400 font-bold">${formatSlashDate(m.date)}</span>
                         </div>
                     </div>
                 `;
             }).join('');
+
+            const activeMatch = getActiveMatch();
+            if (!activeMatch) {
+                workspace.classList.add('hidden');
+                noMatchBox.classList.remove('hidden');
+                document.getElementById('noMatchMainText').textContent = 'اختر لعبة من القائمة لعرض التشكيلة والمعلومات';
+                document.getElementById('noMatchSubText').textContent = 'اضغط على أي لعبة لتظهر معلوماتها وتشكيلتها حتى لو كانت انتهت.';
+            } else {
+                noMatchBox.classList.add('hidden');
+                workspace.classList.remove('hidden');
+            }
         }
 
         window.selectMatch = function(matchId) {
@@ -1417,7 +1394,6 @@
             appState.activeMatchId = target.id;
             if (isAdminMode) syncAdminInputs();
             renderAll();
-            if (isAdminMode) triggerAutoSync();
         };
 
         window.handleDateFilterChange = function(dateVal) {
@@ -1428,11 +1404,13 @@
                 const matchesOnDate = appState.matches.filter(m => m.date === selectedDateFilter);
                 if (matchesOnDate.length > 0) {
                     appState.activeMatchId = matchesOnDate[0].id;
+                    if (isAdminMode) syncAdminInputs();
+                } else {
+                    appState.activeMatchId = '';
                 }
             } else {
                 clearBtn.classList.add('hidden');
             }
-            if (isAdminMode) syncAdminInputs();
             renderAll();
         };
 
@@ -1440,7 +1418,6 @@
             selectedDateFilter = '';
             document.getElementById('playerDateFilter').value = '';
             document.getElementById('clearDateFilterBtn').classList.add('hidden');
-            if (isAdminMode) syncAdminInputs();
             renderAll();
         };
 
@@ -1448,6 +1425,7 @@
             if (!isAdminMode) return;
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('newMatchDateInput').value = today;
+            document.getElementById('newMatchStatusInput').value = 'upcoming';
             document.getElementById('newMatchTitleInput').value = '';
             document.getElementById('newMatchSizeInput').value = '7';
             document.getElementById('newMatchPriceInput').value = '20000';
@@ -1473,7 +1451,8 @@
         window.handleCreateMatch = function(e) {
             e.preventDefault();
             if (!isAdminMode) return;
-            const dateVal = document.getElementById('newMatchDateInput').value || '2026-11-07';
+            const dateVal = document.getElementById('newMatchDateInput').value || '2026-11-03';
+            const statusVal = document.getElementById('newMatchStatusInput').value;
             const titleVal = document.getElementById('newMatchTitleInput').value.trim();
             const sizeVal = parseInt(document.getElementById('newMatchSizeInput').value, 10) || 7;
             const priceVal = Math.max(0, parseInt(document.getElementById('newMatchPriceInput').value, 10) || 0);
@@ -1483,7 +1462,7 @@
                 customTitle: titleVal,
                 teamSize: sizeVal,
                 pitchPrice: priceVal,
-                finished: false
+                finished: statusVal === 'finished'
             });
 
             appState.matches.unshift(newMatch);
@@ -1507,7 +1486,7 @@
             syncAdminInputs();
             renderAll();
             triggerAutoSync();
-            showToast(match.finished ? 'تم تعيين المباراة كـ: انتهت' : 'تمت إعادة المباراة كـ: نشطة');
+            showToast(match.finished ? 'تم تعيين المباراة كـ: انتهت' : 'تم تعيين المباراة كـ: قادمة');
         };
 
         window.deleteCurrentMatch = function() {
@@ -1515,18 +1494,12 @@
             const match = getActiveMatch();
             if (!match) return;
             appState.matches = appState.matches.filter(m => m.id !== match.id);
-            if (appState.matches.length > 0) {
-                appState.activeMatchId = appState.matches[0].id;
-                syncAdminInputs();
-            } else {
-                appState.activeMatchId = '';
-            }
+            appState.activeMatchId = '';
             renderAll();
             triggerAutoSync();
             showToast('تم حذف اللعبة بنجاح');
         };
 
-        // تسجيل الدخول والوضع
         window.openLoginModal = function() {
             document.getElementById('adminPasswordInput').value = '';
             document.getElementById('loginErrorMsg').classList.add('hidden');
@@ -1603,7 +1576,7 @@
                 adminHeaderActions.classList.remove('hidden');
                 adminHeaderActions.classList.add('flex');
                 adminLoginBtn.classList.add('hidden');
-                adminControlPanel.classList.remove('hidden');
+                if (getActiveMatch()) adminControlPanel.classList.remove('hidden');
                 playerViewSummary.classList.add('hidden');
 
                 modeBadge.textContent = 'لوحة الإدارة';
@@ -1619,16 +1592,21 @@
 
                 modeBadge.textContent = 'نسخة اللاعبين';
                 modeBadge.className = 'text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
-                instructionText.innerHTML = `<i data-lucide="eye" class="w-4 h-4 text-emerald-400 shrink-0"></i> <span>أنت تشاهد الآن <strong>نسخة اللاعبين المباشرة</strong>. لتعديل التشكيلة أو الأسماء، اضغط على زر <strong>"تسجيل دخول الإدارة"</strong> في الأعلى.</span>`;
+                instructionText.innerHTML = `<i data-lucide="eye" class="w-4 h-4 text-emerald-400 shrink-0"></i> <span>أنت تشاهد الآن <strong>نسخة اللاعبين المباشرة</strong> للعبة المختارة.</span>`;
             }
             lucide.createIcons();
         }
 
-        // إعدادات المباراة النشطة وحساباتها
         function syncAdminInputs() {
             const match = getActiveMatch();
-            if (!match) return;
-            document.getElementById('matchDateInput').value = match.date || '2026-11-07';
+            const panel = document.getElementById('adminControlPanel');
+            if (!match) {
+                panel.classList.add('hidden');
+                return;
+            }
+            if (isAdminMode) panel.classList.remove('hidden');
+
+            document.getElementById('matchDateInput').value = match.date || '2026-11-03';
             document.getElementById('matchAutoLabelPreview').textContent = buildMatchDayDateLabel(match);
             document.getElementById('matchCustomTitleInput').value = match.customTitle || '';
             document.getElementById('pitchPriceInput').value = match.pitchPrice;
@@ -1638,13 +1616,15 @@
             document.getElementById('timeInput').value = match.matchTime || '';
 
             const finishedBtn = document.getElementById('toggleFinishedBtn');
-            const finishedBadge = document.getElementById('adminMatchFinishedBadge');
+            const statusPill = document.getElementById('adminMatchStatusPill');
             if (match.finished) {
-                finishedBtn.textContent = 'تعيين كـ: نشطة';
-                finishedBadge.classList.remove('hidden');
+                finishedBtn.textContent = 'تعيين كـ: قادمة';
+                statusPill.textContent = 'انتهت';
+                statusPill.className = 'px-2.5 py-0.5 rounded-full text-xs font-black bg-rose-500/20 text-rose-300 border border-rose-500/30';
             } else {
                 finishedBtn.textContent = 'تعيين كـ: انتهت';
-                finishedBadge.classList.add('hidden');
+                statusPill.textContent = 'قادمة';
+                statusPill.className = 'px-2.5 py-0.5 rounded-full text-xs font-black bg-sky-500/15 text-sky-300 border border-sky-500/30';
             }
 
             updateSizeUI();
@@ -1655,7 +1635,7 @@
             if (!isAdminMode) return;
             const match = getActiveMatch();
             if (!match) return;
-            match.date = val || '2026-11-07';
+            match.date = val || '2026-11-03';
             document.getElementById('matchAutoLabelPreview').textContent = buildMatchDayDateLabel(match);
             renderMatchesList();
             updateFinancialSummary();
@@ -1800,8 +1780,8 @@
                 pvStatus.textContent = 'انتهت';
                 pvStatus.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/30';
             } else {
-                pvStatus.textContent = 'نشطة';
-                pvStatus.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+                pvStatus.textContent = 'قادمة';
+                pvStatus.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-black bg-sky-500/15 text-sky-300 border border-sky-500/30';
             }
 
             document.getElementById('pvVenue').textContent = match.venue || 'لم يحدد الملعب';
@@ -1823,6 +1803,7 @@
                 return;
             }
 
+            if (isAdminMode) syncAdminInputs();
             updateSizeUI();
             updateFinancialSummary();
 
@@ -1975,16 +1956,17 @@
 
             return team.subs.map((sub, idx) => {
                 const roleInfo = ROLE_LABELS[sub.role] || ROLE_LABELS.MID;
+                const tKey = team === getActiveMatch().teams.A ? 'A' : 'B';
                 const adminButtonsHtml = isAdminMode ? `
-                    <button onclick="toggleSubPaid('${team === getActiveMatch().teams.A ? 'A' : 'B'}', ${idx})"
+                    <button onclick="toggleSubPaid('${tKey}', ${idx})"
                         class="px-2 py-1 rounded text-[10px] font-bold transition ${sub.paid ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-slate-800 text-slate-400 border border-slate-700'}">
                         ${sub.paid ? 'مدفوع ✓' : 'غير مدفوع'}
                     </button>
-                    <button onclick="quickSwapSubWithPitch('${team === getActiveMatch().teams.A ? 'A' : 'B'}', ${idx})"
+                    <button onclick="quickSwapSubWithPitch('${tKey}', ${idx})"
                         class="p-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 transition">
                         <i data-lucide="arrow-up-down" class="w-3.5 h-3.5"></i>
                     </button>
-                    <button onclick="openPlayerModal('${team === getActiveMatch().teams.A ? 'A' : 'B'}', 'subs', ${idx})"
+                    <button onclick="openPlayerModal('${tKey}', 'subs', ${idx})"
                         class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
                         <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
                     </button>
@@ -1994,7 +1976,6 @@
                     </span>
                 `;
 
-                const tKey = team === getActiveMatch().teams.A ? 'A' : 'B';
                 return `
                     <div class="flex items-center justify-between bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 gap-2">
                         <div class="flex items-center gap-2 min-w-0 flex-1 ${isAdminMode ? 'cursor-pointer' : ''}" ${isAdminMode ? `onclick="openPlayerModal('${tKey}', 'subs', ${idx})"` : ''}>
@@ -2334,6 +2315,8 @@
 
         window.openResetConfirm = function() {
             if (!isAdminMode) return;
+            const match = getActiveMatch();
+            if (!match) return;
             const modal = document.getElementById('resetModal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
@@ -2371,7 +2354,10 @@
 
         window.shareMatchSummary = function() {
             const match = getActiveMatch();
-            if (!match) return;
+            if (!match) {
+                showToast('اختر لعبة أولاً لمشاركة تفاصيلها');
+                return;
+            }
 
             const startersCount = match.teams.A.players.length + match.teams.B.players.length;
             const subsCount = match.teams.A.subs.length + match.teams.B.subs.length;
@@ -2392,7 +2378,7 @@
 
             let summary = `🏆 *${getMatchDisplayName(match)} - تطبيق مُدَرِّبِي* 🏆\n`;
             summary += `━━━━━━━━━━━━━━━━━━━━\n`;
-            if (match.finished) summary += `📌 *الحالة:* انتهت\n`;
+            summary += `📌 *الحالة:* ${match.finished ? 'انتهت' : 'قادمة'}\n`;
             if (match.venue) summary += `🏟️ *الملعب:* ${match.venue}\n`;
             if (match.matchTime) summary += `⏰ *الوقت:* ${match.matchTime}\n`;
             if (match.referee) summary += `🏁 *الحكم:* ${match.referee}\n`;
