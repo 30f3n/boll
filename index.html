@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مدربي | التشكيلة المباشرة ولوحة الإدارة</title>
-    
+    <title>مُدَرِّبِي | التشكيلة المباشرة وإدارة المباريات المتعددة</title>
+
     <!-- تحميل Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- تحميل خط Cairo للغة العربية الاحترافية -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <!-- تحميل مكتبة Lucide Icons للأيقونات الرياضية والواجهة -->
+
+    <!-- تحميل مكتبة Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
@@ -25,7 +25,93 @@
             user-select: none;
         }
 
-        /* تصميم عشب الملعب الاحترافي مع خطوط التكتيك */
+        /* شاشة التحميل المظللة الأولية */
+        #loadingOverlay {
+            background: rgba(5, 9, 18, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: opacity 0.45s ease, visibility 0.45s ease;
+        }
+
+        #loadingOverlay.hidden-overlay {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* مسار حركة الكرة ذهاباً وإياباً مع ارتداد حيوي */
+        .ball-track {
+            position: relative;
+            width: 240px;
+            height: 76px;
+            margin: 0 auto;
+            border-bottom: 2px dashed rgba(250, 204, 21, 0.35);
+            overflow: visible;
+        }
+
+        .bouncing-ball-shuttle {
+            position: absolute;
+            bottom: 4px;
+            left: 0;
+            animation: shuttleLeftRight 2.2s ease-in-out infinite alternate;
+        }
+
+        .ball-spinner {
+            width: 44px;
+            height: 44px;
+            border-radius: 9999px;
+            background: radial-gradient(circle at 30% 30%, #ffffff 0%, #e2e8f0 55%, #94a3b8 100%);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.65), 0 0 18px rgba(250, 204, 21, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: ballHopAndSpin 0.55s ease-in-out infinite alternate;
+            border: 2px solid #0f172a;
+        }
+
+        .ball-shadow {
+            position: absolute;
+            bottom: -3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 34px;
+            height: 8px;
+            border-radius: 9999px;
+            background: rgba(0, 0, 0, 0.6);
+            filter: blur(2px);
+            animation: shadowScale 0.55s ease-in-out infinite alternate;
+        }
+
+        @keyframes shuttleLeftRight {
+            0% {
+                left: 6px;
+            }
+            100% {
+                left: calc(100% - 50px);
+            }
+        }
+
+        @keyframes ballHopAndSpin {
+            0% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            100% {
+                transform: translateY(-28px) rotate(165deg);
+            }
+        }
+
+        @keyframes shadowScale {
+            0% {
+                transform: translateX(-50%) scale(1);
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateX(-50%) scale(0.6);
+                opacity: 0.3;
+            }
+        }
+
+        /* تصميم عشب الملعب الاحترافي */
         .pitch-surface {
             background: repeating-linear-gradient(
                 0deg,
@@ -46,13 +132,12 @@
             touch-action: none;
         }
 
-        /* خطوط الملعب البيضاء */
         .pitch-line {
             border-color: rgba(255, 255, 255, 0.55);
             pointer-events: none;
         }
 
-        /* تأثير القميص/أيقونة اللاعب على الملعب */
+        /* رمز اللاعب على الملعب */
         .player-token {
             position: absolute;
             transform: translate(-50%, -50%);
@@ -69,7 +154,8 @@
             cursor: default;
         }
 
-        .player-token.admin-draggable:active, .player-token.dragging {
+        .player-token.admin-draggable:active,
+        .player-token.dragging {
             cursor: grabbing;
             transform: translate(-50%, -50%) scale(1.15);
             z-index: 50;
@@ -97,29 +183,55 @@
             background: #eab308;
         }
 
-        /* تأثير التوهج الذهبي */
         .gold-glow {
             box-shadow: 0 0 20px rgba(234, 179, 8, 0.18);
         }
 
-        /* إخفاء أسهم حقول الأرقام */
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
+
+        /* تنسيق حقل التاريخ في الوضع الداكن */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.85) sepia(0.5) saturate(5) hue-rotate(5deg);
+            cursor: pointer;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100">
 
-    <!-- شريط حالة وضع الإدارة العلوي (يظهر فقط عند تسجيل دخول المدرب) -->
+    <!-- ========================================================= -->
+    <!-- شاشة التحميل الأولية المظللة بالكرة المرتدة ذهاباً وإياباً -->
+    <!-- ========================================================= -->
+    <div id="loadingOverlay" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="bg-slate-900/95 border border-amber-500/30 rounded-3xl px-7 py-8 max-w-sm w-full text-center shadow-2xl">
+            <div class="ball-track mb-5">
+                <div class="bouncing-ball-shuttle">
+                    <div class="ball-spinner">
+                        <span class="text-xl leading-none select-none">⚽</span>
+                    </div>
+                    <div class="ball-shadow"></div>
+                </div>
+            </div>
+            <h2 class="text-lg sm:text-xl font-black text-white mb-1.5">جاري تحميل الخطط...</h2>
+            <p id="loadingSubtext" class="text-xs text-slate-400 font-semibold">يتم الآن مطابقة بيانات المباريات والتشكيلات</p>
+        </div>
+    </div>
+
+    <!-- شريط حالة وضع الإدارة العلوي -->
     <div id="adminBanner" class="hidden bg-gradient-to-l from-amber-600 via-amber-500 to-yellow-500 text-slate-950 px-4 py-2 text-xs sm:text-sm font-black shadow-md">
         <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2">
                 <i data-lucide="shield-check" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-                <span>وضع الإدارة مفعّل — يمكنك سحب اللاعبين وتعديل الخطة والحسابات</span>
+                <span>وضع الإدارة مفعّل — يمكنك إدارة المباريات، تحديد التواريخ وحالة الانتهاء، وتعديل التشكيلات</span>
             </div>
             <div class="flex items-center gap-2">
+                <button onclick="openCreateMatchModal()" class="px-2.5 py-1 rounded-lg bg-emerald-950 text-emerald-300 hover:bg-emerald-900 text-xs font-extrabold flex items-center gap-1 transition">
+                    <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i>
+                    <span>لعبة جديدة</span>
+                </button>
                 <button onclick="openChangePasswordModal()" class="px-2.5 py-1 rounded-lg bg-slate-950/15 hover:bg-slate-950/25 text-slate-950 text-xs font-extrabold flex items-center gap-1 transition">
                     <i data-lucide="key-round" class="w-3.5 h-3.5"></i>
                     <span>تغيير الباسورد</span>
@@ -155,9 +267,8 @@
 
             <!-- أزرار الإجراءات السريعة -->
             <div class="flex flex-wrap items-center gap-2">
-                <!-- أزرار خاصة بالإدارة فقط -->
                 <div id="adminHeaderActions" class="hidden flex-wrap items-center gap-2">
-                    <button onclick="syncToCloud(true)" title="حفظ ومزامنة فورية مع اللاعبين" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs sm:text-sm font-black shadow-lg shadow-amber-950/40 transition active:scale-95">
+                    <button onclick="syncToCloud(true)" title="حفظ ومزامنة فورية" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs sm:text-sm font-black shadow-lg shadow-amber-950/40 transition active:scale-95">
                         <i data-lucide="cloud-upload" class="w-4 h-4"></i>
                         <span>حفظ ومزامنة</span>
                     </button>
@@ -167,19 +278,17 @@
                         <span class="hidden md:inline">قرعة عشوائية</span>
                     </button>
 
-                    <button onclick="openResetConfirm()" title="إعادة ضبط التشكيلة" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-rose-950/60 text-slate-200 hover:text-rose-300 text-xs sm:text-sm font-bold border border-slate-700 hover:border-rose-800 transition active:scale-95">
+                    <button onclick="openResetConfirm()" title="إعادة ضبط التشكيلة الحالية" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-rose-950/60 text-slate-200 hover:text-rose-300 text-xs sm:text-sm font-bold border border-slate-700 hover:border-rose-800 transition active:scale-95">
                         <i data-lucide="rotate-ccw" class="w-4 h-4 text-rose-400"></i>
                         <span class="hidden md:inline">تصفير</span>
                     </button>
                 </div>
 
-                <!-- زر مشاركة واتساب (متاح للجميع) -->
                 <button onclick="shareMatchSummary()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-l from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-xs sm:text-sm font-extrabold shadow-lg shadow-emerald-950/60 transition active:scale-95">
                     <i data-lucide="share-2" class="w-4 h-4"></i>
                     <span class="hidden sm:inline">مشاركة التشكيلة</span>
                 </button>
 
-                <!-- زر تسجيل دخول الإدارة (يظهر في وضع اللاعبين) -->
                 <button id="adminLoginBtn" onclick="openLoginModal()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs sm:text-sm font-extrabold border border-amber-500/40 shadow-md transition active:scale-95">
                     <i data-lucide="lock" class="w-4 h-4"></i>
                     <span>تسجيل دخول الإدارة</span>
@@ -192,215 +301,370 @@
     <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-4 py-5 space-y-6">
 
         <!-- ========================================================= -->
-        <!-- 1. بطاقة عرض تفاصيل الحجز للاعبين (تظهر في وضع اللاعبين) -->
+        <!-- شريط قوائم المباريات وفحص التاريخ (للاعبين والإدارة)       -->
         <!-- ========================================================= -->
-        <section id="playerViewSummary" class="bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl">
-            <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-800/80">
+        <section class="bg-slate-900/95 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-slate-800/80">
                 <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                        <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <div class="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                        <i data-lucide="calendar-days" class="w-5 h-5"></i>
                     </div>
                     <div>
-                        <h2 class="text-base sm:text-xl font-black text-white">تفاصيل الحجز والتشكيلة الرسمية</h2>
-                        <p class="text-xs text-slate-400">تحديث مباشر من إدارة الفريق — اضغط على اسمك لمعرفة مركزك</p>
+                        <h2 class="text-base sm:text-lg font-black text-white">قائمة المباريات والتواريخ</h2>
+                        <p class="text-xs text-slate-400">اختر لعبة من القائمة لعرض خطتها، أو افحص تاريخاً محدداً للتحقق من وجود لعبة</p>
                     </div>
                 </div>
-                <span id="playerFormatBadge" class="px-3 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-extrabold">
-                    سباعي 7 ضد 7
-                </span>
+
+                <!-- أداة البحث/الفلترة بتاريخ معين -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="flex items-center gap-2 bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5">
+                        <i data-lucide="search-check" class="w-4 h-4 text-emerald-400"></i>
+                        <span class="text-xs font-bold text-slate-300">تاريخ محدد:</span>
+                        <input type="date" id="dateFilterInput" onchange="handleDateFilterChange(this.value)"
+                            class="bg-transparent text-xs font-bold text-amber-300 outline-none cursor-pointer">
+                    </div>
+                    <button id="clearDateFilterBtn" onclick="clearDateFilter()" class="hidden px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition">
+                        عرض كل الألعاب
+                    </button>
+                    <button id="adminQuickAddMatchBtn" onclick="openCreateMatchModal()" class="hidden px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold items-center gap-1.5 shadow transition">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                        <span>إنشاء لعبة جديدة</span>
+                    </button>
+                </div>
             </div>
 
-            <!-- شبكة بطاقات المعلومات السريعة للاعب -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                <!-- الملعب والوقت -->
-                <div class="bg-slate-950/80 border border-slate-800/90 rounded-xl p-3.5 flex flex-col justify-between">
-                    <span class="text-xs font-bold text-slate-400 flex items-center gap-1.5 mb-1.5">
-                        <i data-lucide="map-pin" class="w-4 h-4 text-emerald-400"></i> الملعب والموعد
-                    </span>
-                    <div>
-                        <div id="pvVenue" class="text-sm sm:text-base font-black text-white truncate">ملعب الأبطال</div>
-                        <div id="pvTime" class="text-xs font-bold text-amber-400 mt-0.5">غير محدد بعد</div>
-                    </div>
-                </div>
-
-                <!-- حكم المباراة -->
-                <div class="bg-slate-950/80 border border-slate-800/90 rounded-xl p-3.5 flex flex-col justify-between">
-                    <span class="text-xs font-bold text-slate-400 flex items-center gap-1.5 mb-1.5">
-                        <i data-lucide="shield" class="w-4 h-4 text-sky-400"></i> حكم المباراة
-                    </span>
-                    <div>
-                        <div id="pvReferee" class="text-sm sm:text-base font-black text-white truncate">لم يحدد</div>
-                        <div class="text-[11px] text-slate-400 mt-0.5">طاقم التحكيم</div>
-                    </div>
-                </div>
-
-                <!-- حصة اللاعب الواحد -->
-                <div class="bg-gradient-to-br from-emerald-950/80 to-slate-950 border border-emerald-700/40 rounded-xl p-3.5 flex flex-col justify-between">
-                    <span class="text-xs font-bold text-emerald-300 flex items-center gap-1.5 mb-1.5">
-                        <i data-lucide="banknote" class="w-4 h-4 text-emerald-400"></i> حصة اللاعب الواحد
-                    </span>
-                    <div>
-                        <div class="text-xl sm:text-2xl font-black text-white">
-                            <span id="pvPerPlayerCost">1,500</span>
-                            <span class="text-xs font-bold text-amber-400">د.ع</span>
-                        </div>
-                        <div id="pvTotalPriceNote" class="text-[11px] text-slate-400 mt-0.5">من أصل 20,000 د.ع (14 لاعب)</div>
-                    </div>
-                </div>
-
-                <!-- حالة التسديد -->
-                <div class="bg-slate-950/80 border border-slate-800/90 rounded-xl p-3.5 flex flex-col justify-between">
-                    <span class="text-xs font-bold text-slate-400 flex items-center gap-1.5 mb-1.5">
-                        <i data-lucide="check-circle-2" class="w-4 h-4 text-amber-400"></i> حالة تسديد الحجز
-                    </span>
-                    <div>
-                        <div id="pvPaidRatio" class="text-base sm:text-lg font-black text-emerald-400">0 / 14 لاعب</div>
-                        <div class="w-full bg-slate-800 h-2 rounded-full mt-2 overflow-hidden">
-                            <div id="pvPaidProgressBar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
-                        </div>
-                    </div>
-                </div>
+            <!-- قائمة أزرار/بطاقات المباريات -->
+            <div id="matchesListBar" class="flex items-center gap-2.5 overflow-x-auto pb-1">
+                <!-- يتم توليد قوائم المباريات ديناميكياً -->
             </div>
         </section>
 
-        <!-- ========================================================= -->
-        <!-- 2. لوحة تحكم الإدارة (تظهر فقط بعد تسجيل دخول المدرب)    -->
-        <!-- ========================================================= -->
-        <section id="adminControlPanel" class="hidden bg-slate-900/90 border border-amber-500/30 rounded-2xl p-4 sm:p-5 shadow-xl">
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-800/80">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="sliders-horizontal" class="w-5 h-5 text-amber-400"></i>
-                    <h2 class="text-base sm:text-lg font-extrabold text-white">إعدادات المباراة والحساب المالي (الإدارة)</h2>
-                </div>
-                <span id="saveIndicator" class="text-xs text-emerald-400 flex items-center gap-1">
-                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> جاهز للمزامنة
-                </span>
+        <!-- رسالة «لا يوجد» عند اختيار تاريخ لا توجد فيه لعبة -->
+        <section id="noMatchForDateBox" class="hidden bg-slate-900/95 border border-rose-500/35 rounded-2xl p-8 text-center shadow-2xl">
+            <div class="w-14 h-14 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-400 flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="calendar-x-2" class="w-7 h-7"></i>
             </div>
+            <h3 class="text-xl font-black text-white mb-1">لا يوجد</h3>
+            <p id="noMatchDateDesc" class="text-sm text-slate-400 mb-5">لا توجد لعبة مجدولة في التاريخ المحدد.</p>
+            <div class="flex flex-wrap items-center justify-center gap-3">
+                <button onclick="clearDateFilter()" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs sm:text-sm font-black transition">
+                    العودة إلى المباريات المتاحة
+                </button>
+                <button id="noMatchCreateBtn" onclick="openCreateMatchModal(document.getElementById('dateFilterInput').value)" class="hidden px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-extrabold transition">
+                    إنشاء لعبة في هذا التاريخ
+                </button>
+            </div>
+        </section>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                
-                <!-- 1. نظام اللعب وعدد اللاعبين -->
-                <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 flex flex-col justify-between">
-                    <label class="text-xs font-bold text-slate-400 mb-2 flex items-center justify-between">
-                        <span>نظام اللعب (الأساسيين)</span>
-                        <span class="text-amber-400 font-extrabold" id="formatBadge">سباعي 7 ضد 7</span>
-                    </label>
-                    
-                    <div class="grid grid-cols-4 gap-1.5 mb-2.5">
-                        <button onclick="setTeamSize(5)" data-size="5" class="size-preset-btn py-1.5 rounded-lg text-xs font-bold border border-slate-700 bg-slate-900 hover:border-amber-400 transition">5×5</button>
-                        <button onclick="setTeamSize(6)" data-size="6" class="size-preset-btn py-1.5 rounded-lg text-xs font-bold border border-slate-700 bg-slate-900 hover:border-amber-400 transition">6×6</button>
-                        <button onclick="setTeamSize(7)" data-size="7" class="size-preset-btn py-1.5 rounded-lg text-xs font-bold border border-amber-400 bg-amber-500/20 text-amber-300 transition">7×7</button>
-                        <button onclick="setTeamSize(8)" data-size="8" class="size-preset-btn py-1.5 rounded-lg text-xs font-bold border border-slate-700 bg-slate-900 hover:border-amber-400 transition">8×8</button>
-                    </div>
+        <!-- حاوية محتوى المباراة النشطة -->
+        <div id="activeMatchContent" class="space-y-6">
 
-                    <div class="flex items-center justify-between bg-slate-900 rounded-lg px-2.5 py-1.5 border border-slate-800">
-                        <span class="text-xs text-slate-300">عدد مخصص لكل فريق:</span>
-                        <div class="flex items-center gap-2">
-                            <button onclick="changeTeamSize(-1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold flex items-center justify-center">-</button>
-                            <span id="customSizeDisplay" class="w-6 text-center font-black text-amber-400 text-sm">7</span>
-                            <button onclick="changeTeamSize(1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold flex items-center justify-center">+</button>
+            <!-- بطاقة عرض تفاصيل الحجز للاعبين -->
+            <section id="playerViewSummary" class="bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl">
+                <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-800/80">
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                            <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h2 id="pvMatchTitle" class="text-base sm:text-xl font-black text-white">لعبة يوم الخميس 2026/11/7</h2>
+                                <span id="pvFinishedBadge" class="hidden px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-xs font-black">
+                                    انتهت
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-400">تحديث مباشر من إدارة الفريق — الخطة والحسابات للمباراة المختارة</p>
                         </div>
                     </div>
+                    <span id="playerFormatBadge" class="px-3 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-extrabold">
+                        سباعي 7 ضد 7
+                    </span>
                 </div>
 
-                <!-- 2. سعر الحجز وتقسيم المبلغ -->
-                <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 flex flex-col justify-between">
-                    <label class="text-xs font-bold text-slate-400 mb-1.5 flex items-center justify-between">
-                        <span>سعر حجز الملعب الكامل</span>
-                        <span class="text-[11px] text-emerald-400">دينار عراقي (IQD)</span>
-                    </label>
-                    
-                    <div class="relative mb-2.5">
-                        <input type="number" id="pitchPriceInput" step="1000" min="0" value="20000" oninput="updatePrice(this.value)"
-                            class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-lg font-black text-amber-300 outline-none transition text-left" dir="ltr">
-                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">د.ع</span>
-                    </div>
-
-                    <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-300 select-none">
-                        <input type="checkbox" id="includeSubsInPrice" checked onchange="toggleIncludeSubs(this.checked)" class="w-4 h-4 rounded accent-emerald-500">
-                        <span>تشمل القسمة لاعبي الاحتياط أيضاً</span>
-                    </label>
-                </div>
-
-                <!-- 3. ملخص الحساب المالي والتحصيل -->
-                <div class="bg-gradient-to-br from-emerald-950/70 to-slate-950 border border-emerald-800/50 rounded-xl p-3.5 flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-xs font-bold text-emerald-300 flex items-center gap-1">
-                            <i data-lucide="wallet" class="w-3.5 h-3.5"></i> حصة اللاعب الواحد
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                    <div class="bg-slate-950/80 border border-slate-800/90 rounded-xl p-3.5 flex flex-col justify-between">
+                        <span class="text-xs font-bold text-slate-400 flex items-center gap-1.5 mb-1.5">
+                            <i data-lucide="map-pin" class="w-4 h-4 text-emerald-400"></i> الملعب والموعد
                         </span>
-                        <span id="totalPlayersCountBadge" class="text-[11px] bg-emerald-900/80 text-emerald-200 px-2 py-0.5 rounded-full font-bold">14 لاعب</span>
-                    </div>
-
-                    <div class="my-1">
-                        <div class="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                            <span id="perPlayerCostDisplay">1,500</span>
-                            <span class="text-xs font-bold text-amber-400">د.ع</span>
+                        <div>
+                            <div id="pvVenue" class="text-sm sm:text-base font-black text-white truncate">ملعب الأبطال</div>
+                            <div id="pvTime" class="text-xs font-bold text-amber-400 mt-0.5">غير محدد بعد</div>
                         </div>
-                        <p class="text-[11px] text-slate-400 mt-0.5" id="collectedAmountNote">المحصّل: 0 د.ع | المتبقي: 20,000 د.ع</p>
                     </div>
 
-                    <div class="flex items-center justify-between text-xs pt-2 border-t border-emerald-900/50">
-                        <span class="text-slate-400">تم جمع المبلغ من:</span>
-                        <span id="paidCounterDisplay" class="font-extrabold text-emerald-400">0 / 14 لاعب</span>
+                    <div class="bg-slate-950/80 border border-slate-800/90 rounded-xl p-3.5 flex flex-col justify-between">
+                        <span class="text-xs font-bold text-slate-400 flex items-center gap-1.5 mb-1.5">
+                            <i data-lucide="shield" class="w-4 h-4 text-sky-400"></i> حكم المباراة
+                        </span>
+                        <div>
+                            <div id="pvReferee" class="text-sm sm:text-base font-black text-white truncate">لم يحدد</div>
+                            <div id="pvStatusText" class="text-[11px] text-emerald-400 font-bold mt-0.5">مباراة نشطة</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-emerald-950/80 to-slate-950 border border-emerald-700/40 rounded-xl p-3.5 flex flex-col justify-between">
+                        <span class="text-xs font-bold text-emerald-300 flex items-center gap-1.5 mb-1.5">
+                            <i data-lucide="banknote" class="w-4 h-4 text-emerald-400"></i> حصة اللاعب الواحد
+                        </span>
+                        <div>
+                            <div class="text-xl sm:text-2xl font-black text-white">
+                                <span id="pvPerPlayerCost">1,500</span>
+                                <span class="text-xs font-bold text-amber-400">د.ع</span>
+                            </div>
+                            <div id="pvTotalPriceNote" class="text-[11px] text-slate-400 mt-0.5">من أصل 20,000 د.ع</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950/80 border border-slate-800/90 rounded-xl p-3.5 flex flex-col justify-between">
+                        <span class="text-xs font-bold text-slate-400 flex items-center gap-1.5 mb-1.5">
+                            <i data-lucide="check-circle-2" class="w-4 h-4 text-amber-400"></i> حالة تسديد الحجز
+                        </span>
+                        <div>
+                            <div id="pvPaidRatio" class="text-base sm:text-lg font-black text-emerald-400">0 / 14 لاعب</div>
+                            <div class="w-full bg-slate-800 h-2 rounded-full mt-2 overflow-hidden">
+                                <div id="pvPaidProgressBar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- لوحة تحكم الإدارة للمباراة المحددة -->
+            <section id="adminControlPanel" class="hidden bg-slate-900/90 border border-amber-500/30 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-800/80">
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <i data-lucide="sliders-horizontal" class="w-5 h-5 text-amber-400"></i>
+                        <h2 class="text-base sm:text-lg font-extrabold text-white">إعدادات المباراة المحددة والحساب المالي</h2>
+                        <span id="adminMatchFinishedBadge" class="hidden px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-xs font-black">
+                            انتهت
+                        </span>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <!-- مفتاح حالة انتهاء المباراة -->
+                        <button id="toggleFinishedBtn" onclick="toggleMatchFinished()" class="px-3 py-1.5 rounded-xl text-xs font-black border transition flex items-center gap-1.5">
+                            <i data-lucide="flag" class="w-3.5 h-3.5"></i>
+                            <span id="toggleFinishedLabel">تعيين كـ: انتهت</span>
+                        </button>
+
+                        <!-- زر حذف المباراة المحددة -->
+                        <button onclick="deleteCurrentMatch()" class="px-3 py-1.5 rounded-xl bg-rose-950/80 hover:bg-rose-900 text-rose-300 border border-rose-800 text-xs font-extrabold transition flex items-center gap-1.5">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            <span>حذف اللعبة</span>
+                        </button>
+
+                        <span id="saveIndicator" class="text-xs text-emerald-400 flex items-center gap-1">
+                            <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> جاهز للمزامنة
+                        </span>
                     </div>
                 </div>
 
-                <!-- 4. الحكم وتفاصيل الملعب والوقت -->
-                <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 flex flex-col justify-between space-y-2">
+                <!-- صف إعدادات التاريخ والاسم -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-950/60 border border-slate-800/80 rounded-xl p-3">
                     <div>
-                        <label class="text-xs font-bold text-slate-400 mb-1 flex items-center gap-1">
-                            <i data-lucide="shield" class="w-3.5 h-3.5 text-amber-400"></i> حكم المباراة
-                        </label>
-                        <input type="text" id="refereeInput" placeholder="مثال: كابتن علي حسين" oninput="updateMatchMeta()"
-                            class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-lg px-3 py-1.5 text-xs sm:text-sm text-white outline-none transition">
+                        <label class="text-xs font-bold text-slate-400 mb-1 block">تاريخ المباراة</label>
+                        <input type="date" id="matchDateInput" onchange="updateMatchDate(this.value)"
+                            class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-lg px-3 py-1.5 text-xs sm:text-sm font-bold text-amber-300 outline-none">
                     </div>
-
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="text-[11px] font-bold text-slate-400 mb-0.5 block">اسم الملعب</label>
-                            <input type="text" id="venueInput" placeholder="ملعب الأبطال" oninput="updateMatchMeta()"
-                                class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none transition">
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 mb-1 block">اليوم والتاريخ الظاهر للاعبين</label>
+                        <div id="computedDateLabelPreview" class="bg-slate-900/80 border border-slate-800 rounded-lg px-3 py-1.5 text-xs sm:text-sm font-black text-emerald-300">
+                            لعبة يوم الخميس 2026/11/7
                         </div>
-                        <div>
-                            <label class="text-[11px] font-bold text-slate-400 mb-0.5 block">الوقت / اليوم</label>
-                            <input type="text" id="timeInput" placeholder="الخميس 9:00 م" oninput="updateMatchMeta()"
-                                class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none transition">
-                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 mb-1 block">عنوان/وصف إضافي (اختياري)</label>
+                        <input type="text" id="matchLabelInput" placeholder="مثال: ودية الخميس الليلية" oninput="updateMatchMeta()"
+                            class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-lg px-3 py-1.5 text-xs sm:text-sm text-white outline-none">
                     </div>
                 </div>
 
-            </div>
-        </section>
+                <!-- شبكة الإعدادات الأربعة -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- 1. نظام اللعب -->
+                    <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 flex flex-col justify-between">
+                        <label class="text-xs font-bold text-slate-400 mb-2 flex items-center justify-between">
+                            <span>نظام اللعب (الأساسيين)</span>
+                            <span class="text-amber-400 font-extrabold" id="formatBadge">سباعي 7 ضد 7</span>
+                        </label>
 
-        <!-- شريط التوضيح التفاعلي -->
-        <div id="instructionBanner" class="bg-slate-900/90 border border-slate-800 rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-300">
-            <div class="flex items-center gap-2" id="instructionText">
-                <i data-lucide="eye" class="w-4 h-4 text-emerald-400 shrink-0"></i>
-                <span>أنت تشاهد الآن <strong>نسخة اللاعبين المباشرة</strong>. لتعديل التشكيلة أو الأسماء، اضغط على زر <strong>"تسجيل دخول الإدارة"</strong> في الأعلى.</span>
+                        <div class="grid grid-cols-4 gap-1.5 mb-2.5">
+                            <button onclick="setTeamSize(5)" data-size="5" class="size-preset-btn py-1.5 rounded-lg text-xs font-bold border border-slate-700 bg-slate-900 hover:border-amber-400 transition">5×5</button>
+                            <button onclick="setTeamSize(6)" data-size="6" class="size-preset-btn py-1.5 rounded-lg text-xs font-bold border border-slate-700 bg-slate-900 hover:border-amber-400 transition">6×6</button>
+                            <button onclick="setTeamSize(7)" data-size="7" class="size-preset-btn py-1.5 rounded-lg text-xs font-bold border border-amber-400 bg-amber-500/20 text-amber-300 transition">7×7</button>
+                            <button onclick="setTeamSize(8)" data-size="8" class="size-preset-btn py-1.5 rounded-lg text-xs font-bold border border-slate-700 bg-slate-900 hover:border-amber-400 transition">8×8</button>
+                        </div>
+
+                        <div class="flex items-center justify-between bg-slate-900 rounded-lg px-2.5 py-1.5 border border-slate-800">
+                            <span class="text-xs text-slate-300">عدد مخصص لكل فريق:</span>
+                            <div class="flex items-center gap-2">
+                                <button onclick="changeTeamSize(-1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold flex items-center justify-center">-</button>
+                                <span id="customSizeDisplay" class="w-6 text-center font-black text-amber-400 text-sm">7</span>
+                                <button onclick="changeTeamSize(1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold flex items-center justify-center">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. سعر الحجز -->
+                    <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 flex flex-col justify-between">
+                        <label class="text-xs font-bold text-slate-400 mb-1.5 flex items-center justify-between">
+                            <span>سعر حجز الملعب الكامل</span>
+                            <span class="text-[11px] text-emerald-400">دينار عراقي (IQD)</span>
+                        </label>
+
+                        <div class="relative mb-2.5">
+                            <input type="number" id="pitchPriceInput" step="1000" min="0" value="20000" oninput="updatePrice(this.value)"
+                                class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-lg font-black text-amber-300 outline-none transition text-left" dir="ltr">
+                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">د.ع</span>
+                        </div>
+
+                        <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-300 select-none">
+                            <input type="checkbox" id="includeSubsInPrice" checked onchange="toggleIncludeSubs(this.checked)" class="w-4 h-4 rounded accent-emerald-500">
+                            <span>تشمل القسمة لاعبي الاحتياط أيضاً</span>
+                        </label>
+                    </div>
+
+                    <!-- 3. ملخص الحساب المالي -->
+                    <div class="bg-gradient-to-br from-emerald-950/70 to-slate-950 border border-emerald-800/50 rounded-xl p-3.5 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold text-emerald-300 flex items-center gap-1">
+                                <i data-lucide="wallet" class="w-3.5 h-3.5"></i> حصة اللاعب الواحد
+                            </span>
+                            <span id="totalPlayersCountBadge" class="text-[11px] bg-emerald-900/80 text-emerald-200 px-2 py-0.5 rounded-full font-bold">14 لاعب</span>
+                        </div>
+
+                        <div class="my-1">
+                            <div class="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                                <span id="perPlayerCostDisplay">1,500</span>
+                                <span class="text-xs font-bold text-amber-400">د.ع</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-0.5" id="collectedAmountNote">المحصّل: 0 د.ع | المتبقي: 20,000 د.ع</p>
+                        </div>
+
+                        <div class="flex items-center justify-between text-xs pt-2 border-t border-emerald-900/50">
+                            <span class="text-slate-400">تم جمع المبلغ من:</span>
+                            <span id="paidCounterDisplay" class="font-extrabold text-emerald-400">0 / 14 لاعب</span>
+                        </div>
+                    </div>
+
+                    <!-- 4. الحكم والملعب والوقت -->
+                    <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 flex flex-col justify-between space-y-2">
+                        <div>
+                            <label class="text-xs font-bold text-slate-400 mb-1 flex items-center gap-1">
+                                <i data-lucide="shield" class="w-3.5 h-3.5 text-amber-400"></i> حكم المباراة
+                            </label>
+                            <input type="text" id="refereeInput" placeholder="مثال: كابتن علي حسين" oninput="updateMatchMeta()"
+                                class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-lg px-3 py-1.5 text-xs sm:text-sm text-white outline-none transition">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-400 mb-0.5 block">اسم الملعب</label>
+                                <input type="text" id="venueInput" placeholder="ملعب الأبطال" oninput="updateMatchMeta()"
+                                    class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none transition">
+                            </div>
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-400 mb-0.5 block">الوقت / الساعة</label>
+                                <input type="text" id="timeInput" placeholder="9:00 مساءً" oninput="updateMatchMeta()"
+                                    class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none transition">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- شريط التوضيح التفاعلي -->
+            <div id="instructionBanner" class="bg-slate-900/90 border border-slate-800 rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-300">
+                <div class="flex items-center gap-2" id="instructionText">
+                    <i data-lucide="eye" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+                    <span>أنت تشاهد الآن <strong>نسخة اللاعبين المباشرة</strong>. لتعديل التشكيلة أو الأسماء، اضغط على زر <strong>"تسجيل دخول الإدارة"</strong> في الأعلى.</span>
+                </div>
+                <div class="flex items-center gap-3 text-[11px]">
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span> مدفوع</span>
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-500 inline-block"></span> غير مدفوع</span>
+                </div>
             </div>
-            <div class="flex items-center gap-3 text-[11px]">
-                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span> مدفوع</span>
-                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-500 inline-block"></span> غير مدفوع</span>
-            </div>
+
+            <!-- قسم الملاعب التفاعلية -->
+            <section class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="pitchesContainer"></section>
         </div>
-
-        <!-- قسم الملاعب التفاعلية (ملعب الفريق الأول + ملعب الفريق الثاني) -->
-        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="pitchesContainer">
-            <!-- يتم توليد الملاعب ديناميكياً عبر JavaScript -->
-        </section>
 
     </main>
 
-    <!-- التذييل (Footer) -->
+    <!-- التذييل -->
     <footer class="bg-slate-900 border-t border-slate-800 py-4 px-4 text-center text-xs text-slate-400 mt-8">
-        <p>تطبيق <strong class="text-amber-400">مُدَرِّبِي</strong> — منصة إدارة التشكيلات والحجوزات الرياضية بالمزامنة الفورية.</p>
+        <p>تطبيق <strong class="text-amber-400">مُدَرِّبِي</strong> — منصة إدارة التشكيلات والحجوزات والمباريات المتعددة.</p>
     </footer>
 
     <!-- ========================================================= -->
     <!-- النوافذ المنبثقة (Modals)                                  -->
     <!-- ========================================================= -->
 
-    <!-- 1. نافذة تسجيل دخول الإدارة (Firebase Auth Email & Password) -->
+    <!-- 1. نافذة إنشاء لعبة/مباراة جديدة -->
+    <div id="createMatchModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+            <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+                <h3 class="text-lg font-extrabold text-white flex items-center gap-2">
+                    <i data-lucide="calendar-plus" class="w-5 h-5 text-emerald-400"></i>
+                    <span>إنشاء لعبة / مباراة جديدة</span>
+                </h3>
+                <button onclick="closeCreateMatchModal()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleCreateMatch(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">اختر تاريخ المباراة</label>
+                    <input type="date" id="newMatchDateInput" required onchange="previewNewMatchTitle()"
+                        class="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-sm font-bold text-amber-300 outline-none">
+                    <p id="newMatchPreviewTitle" class="text-xs font-extrabold text-emerald-400 mt-1.5"></p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">نظام اللعب</label>
+                        <select id="newMatchSizeSelect" class="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-xs font-bold text-white outline-none">
+                            <option value="5">5 ضد 5</option>
+                            <option value="6">6 ضد 6</option>
+                            <option value="7" selected>7 ضد 7</option>
+                            <option value="8">8 ضد 8</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">سعر الحجز (د.ع)</label>
+                        <input type="number" id="newMatchPriceInput" step="1000" min="0" value="20000"
+                            class="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-xs font-black text-amber-300 outline-none text-left" dir="ltr">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">الملعب</label>
+                        <input type="text" id="newMatchVenueInput" value="ملعب الأبطال"
+                            class="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-xs text-white outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">الوقت</label>
+                        <input type="text" id="newMatchTimeInput" value="9:00 مساءً"
+                            class="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-xs text-white outline-none">
+                    </div>
+                </div>
+
+                <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-300 select-none bg-slate-950/70 p-2.5 rounded-xl border border-slate-800">
+                    <input type="checkbox" id="newMatchFinishedInput" class="w-4 h-4 rounded accent-rose-500">
+                    <span>تعيين حالة المباراة كـ <strong>«انتهت»</strong> مباشرة</span>
+                </label>
+
+                <div class="flex items-center gap-2 pt-2">
+                    <button type="button" onclick="closeCreateMatchModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">إلغاء</button>
+                    <button type="submit" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-lg">إنشاء المباراة</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. نافذة تسجيل دخول الإدارة -->
     <div id="loginModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm p-6 shadow-2xl">
             <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
@@ -415,15 +679,10 @@
 
             <form onsubmit="handleAdminLogin(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1.5">البريد الإلكتروني للإدارة</label>
-                    <input type="email" id="adminEmailInput" required placeholder="admin@example.com" autocomplete="email"
-                        class="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-sm font-bold text-white outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1.5">كلمة المرور</label>
-                    <input type="password" id="adminPasswordInput" required placeholder="••••••••" autocomplete="current-password"
+                    <label class="block text-xs font-bold text-slate-300 mb-1.5">أدخل كلمة مرور الإدارة</label>
+                    <input type="password" id="adminPasswordInput" required placeholder="••••" autocomplete="current-password"
                         class="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-4 py-2.5 text-center text-lg font-black tracking-widest text-amber-300 outline-none">
-                    <p id="loginErrorMsg" class="hidden text-xs text-rose-400 font-bold mt-1.5 text-center">بيانات الدخول غير صحيحة، حاول مرة أخرى!</p>
+                    <p id="loginErrorMsg" class="hidden text-xs text-rose-400 font-bold mt-1.5 text-center">كلمة المرور غير صحيحة (الافتراضية: 1234)</p>
                 </div>
 
                 <div class="flex items-center gap-2 pt-2">
@@ -434,7 +693,7 @@
         </div>
     </div>
 
-    <!-- 2. نافذة تغيير كلمة مرور الإدارة -->
+    <!-- 3. نافذة تغيير كلمة مرور الإدارة -->
     <div id="changePasswordModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm p-6 shadow-2xl">
             <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
@@ -462,9 +721,9 @@
         </div>
     </div>
 
-    <!-- 3. نافذة تعديل بيانات اللاعب (Modal) -->
+    <!-- 4. نافذة تعديل بيانات اللاعب -->
     <div id="playerModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-5 shadow-2xl transform transition-all">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-5 shadow-2xl">
             <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
                 <h3 class="text-lg font-extrabold text-white flex items-center gap-2">
                     <i data-lucide="user-cog" class="w-5 h-5 text-amber-400"></i>
@@ -499,7 +758,6 @@
                     </div>
                 </div>
 
-                <!-- حالة الدفع -->
                 <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex items-center justify-between">
                     <div>
                         <span class="text-sm font-bold text-white block">حالة دفع الحجز</span>
@@ -510,12 +768,9 @@
                     </button>
                 </div>
 
-                <!-- خيارات التبديل مع الاحتياط أو الحذف -->
                 <div id="modalSwapSection" class="pt-2 border-t border-slate-800">
                     <label class="block text-xs font-bold text-slate-400 mb-1.5">تبديل سريع مع دكة البدلاء:</label>
-                    <div id="modalSubOptions" class="flex flex-wrap gap-1.5">
-                        <!-- خيارات البدلاء -->
-                    </div>
+                    <div id="modalSubOptions" class="flex flex-wrap gap-1.5"></div>
                 </div>
             </div>
 
@@ -531,14 +786,14 @@
         </div>
     </div>
 
-    <!-- 4. نافذة تأكيد التصفير -->
+    <!-- 5. نافذة تأكيد التصفير -->
     <div id="resetModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm p-5 shadow-2xl text-center">
             <div class="w-12 h-12 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto mb-3">
                 <i data-lucide="alert-triangle" class="w-6 h-6"></i>
             </div>
-            <h3 class="text-lg font-extrabold text-white mb-1">إعادة ضبط التشكيلة؟</h3>
-            <p class="text-xs text-slate-400 mb-5">سيتم إعادة أسماء اللاعبين وتوزيعهم إلى الوضع الافتراضي الحالي ومزامنته.</p>
+            <h3 class="text-lg font-extrabold text-white mb-1">إعادة ضبط تشكيلة المباراة؟</h3>
+            <p class="text-xs text-slate-400 mb-5">سيتم إعادة أسماء اللاعبين وتوزيعهم للمباراة الحالية إلى الوضع الافتراضي.</p>
             <div class="flex items-center justify-center gap-3">
                 <button onclick="closeResetConfirm()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold">تراجع</button>
                 <button onclick="confirmReset()" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-extrabold">نعم، أعد الضبط</button>
@@ -546,25 +801,26 @@
         </div>
     </div>
 
-    <!-- إشعار منبثق (Toast Notification) -->
+    <!-- إشعار منبثق (Toast) -->
     <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden items-center gap-2 bg-slate-900 border border-emerald-500/60 text-white px-4 py-3 rounded-2xl shadow-2xl text-xs sm:text-sm font-bold">
         <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
         <span id="toastMessage">تم الحفظ بنجاح!</span>
     </div>
 
     <!-- ========================================================= -->
-    <!-- منطق التطبيق والربط الفوري مع Firebase Firestore            -->
+    <!-- منطق التطبيق وإدارة المباريات المتعددة والمزامنة المحلية/السحابية -->
     <!-- ========================================================= -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { firebaseConfig, appId } from "./firebase-config.js";
 
         // ==========================================
         // 1. الثوابت والخطط التكتيكية
         // ==========================================
+        const STORAGE_KEY = 'mudaribi_multi_matches_v1';
+        const ARABIC_DAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+
         const TEAM_COLORS = [
             { name: 'أحمر ملكي', bg: '#dc2626', border: '#fca5a5', text: '#ffffff' },
             { name: 'أزرق سماوي', bg: '#2563eb', border: '#93c5fd', text: '#ffffff' },
@@ -709,47 +965,38 @@
         const DEFAULT_NAMES_B = ['عمر', 'زيد', 'محمد', 'سيف', 'بشار', 'طارق', 'أمير', 'حسن', 'رامي', 'ماجد', 'فهد'];
 
         // ==========================================
-        // 2. متغيرات Firebase وحالة التطبيق
+        // 2. دوال التاريخ والتنسيق العربي
         // ==========================================
-        let db = null;
-        let auth = null;
-        let currentUser = null;
-        let matchDocRef = null;
-        let isCloudConnected = false;
-        let isAdminMode = false;
-        let syncDebounceTimer = null;
+        function parseIsoDateLocal(isoStr) {
+            if (!isoStr || typeof isoStr !== 'string') return null;
+            const parts = isoStr.split('-').map(Number);
+            if (parts.length !== 3 || parts.some(isNaN)) return null;
+            return new Date(parts[0], parts[1] - 1, parts[2]);
+        }
 
-        let appState = {
-            adminPassword: '1234',
-            teamSize: 7,
-            pitchPrice: 20000,
-            includeSubsInPrice: true,
-            referee: 'كابتن علي حسين',
-            venue: 'ملعب الأبطال الخماسي',
-            matchTime: 'الخميس 9:00 مساءً',
-            teams: {
-                A: {
-                    name: 'الفريق الأول (النسور)',
-                    colorIndex: 0,
-                    formation: '1-2-3-1 (مثالية للسباعي)',
-                    players: [],
-                    subs: []
-                },
-                B: {
-                    name: 'الفريق الثاني (الصقور)',
-                    colorIndex: 1,
-                    formation: '1-2-3-1 (مثالية للسباعي)',
-                    players: [],
-                    subs: []
-                }
-            }
-        };
+        function formatSlashDate(isoStr) {
+            const d = parseIsoDateLocal(isoStr);
+            if (!d) return isoStr || '';
+            return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
+        }
 
-        let dragContext = null;
-        let editingTarget = null;
+        function getArabicDayName(isoStr) {
+            const d = parseIsoDateLocal(isoStr);
+            if (!d) return '';
+            return ARABIC_DAYS[d.getDay()] || '';
+        }
+
+        function buildMatchDayHeading(match) {
+            const dayName = getArabicDayName(match.date);
+            const slashDate = formatSlashDate(match.date);
+            const base = `لعبة يوم ${dayName ? dayName + ' ' : ''}${slashDate}`;
+            return match.customLabel && match.customLabel.trim()
+                ? `${base} — ${match.customLabel.trim()}`
+                : base;
+        }
 
         // ==========================================
-        // 3. تهيئة التشكيلات الافتراضية
+        // 3. بناء بيانات المباريات الافتراضية
         // ==========================================
         function generateFormationCoords(size, formationName) {
             if (FORMATIONS_DB[size] && FORMATIONS_DB[size][formationName]) {
@@ -778,94 +1025,212 @@
             placeLine(defCount, 70, 'DEF');
             if (midCount > 0) placeLine(midCount, 45, 'MID');
             placeLine(attCount, 20, 'ATT');
-
             return coords;
         }
 
-        function buildDefaultTeamPlayers(teamKey, size, formationName) {
+        function buildDefaultTeamPlayers(teamKey, size, formationName, seedOffset = 0) {
             const coords = generateFormationCoords(size, formationName);
             const namesPool = teamKey === 'A' ? DEFAULT_NAMES_A : DEFAULT_NAMES_B;
             return coords.map((pos, idx) => ({
-                id: `${teamKey}_p_${idx}_${Date.now()}`,
-                name: namesPool[idx] || `لاعب ${idx + 1}`,
+                id: `${teamKey}_p_${idx}_${seedOffset}_${Math.random().toString(36).slice(2, 6)}`,
+                name: namesPool[(idx + seedOffset) % namesPool.length] || `لاعب ${idx + 1}`,
                 number: idx + 1,
                 role: pos.role,
                 x: pos.x,
                 y: pos.y,
-                paid: false
+                paid: idx < 2
             }));
         }
 
-        function resetToDefaultState() {
-            const size = appState.teamSize || 7;
+        function createMatchObject({
+            id,
+            date,
+            customLabel = '',
+            teamSize = 7,
+            pitchPrice = 20000,
+            includeSubsInPrice = true,
+            referee = 'كابتن علي حسين',
+            venue = 'ملعب الأبطال الخماسي',
+            matchTime = '9:00 مساءً',
+            finished = false,
+            seedOffset = 0
+        }) {
+            const size = Math.max(3, Math.min(11, parseInt(teamSize) || 7));
             const defaultForm = FORMATIONS_DB[size] ? Object.keys(FORMATIONS_DB[size])[0] : 'تشكيلة مخصصة';
 
-            appState.teams.A.formation = defaultForm;
-            appState.teams.B.formation = defaultForm;
-            appState.teams.A.players = buildDefaultTeamPlayers('A', size, defaultForm);
-            appState.teams.B.players = buildDefaultTeamPlayers('B', size, defaultForm);
-            appState.teams.A.subs = [
-                { id: 'A_sub_1', name: 'احتياط 1', number: 12, role: 'MID', paid: false }
-            ];
-            appState.teams.B.subs = [
-                { id: 'B_sub_1', name: 'احتياط 1', number: 12, role: 'ATT', paid: false }
-            ];
+            return {
+                id: id || `match_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+                date,
+                customLabel,
+                teamSize: size,
+                pitchPrice: Math.max(0, parseInt(pitchPrice) || 0),
+                includeSubsInPrice: Boolean(includeSubsInPrice),
+                referee,
+                venue,
+                matchTime,
+                finished: Boolean(finished),
+                teams: {
+                    A: {
+                        name: 'الفريق الأول (النسور)',
+                        colorIndex: 0,
+                        formation: defaultForm,
+                        players: buildDefaultTeamPlayers('A', size, defaultForm, seedOffset),
+                        subs: [
+                            { id: `A_sub_${seedOffset}_1`, name: 'احتياط 1', number: size + 1, role: 'MID', paid: false }
+                        ]
+                    },
+                    B: {
+                        name: 'الفريق الثاني (الصقور)',
+                        colorIndex: 1,
+                        formation: defaultForm,
+                        players: buildDefaultTeamPlayers('B', size, defaultForm, seedOffset + 1),
+                        subs: [
+                            { id: `B_sub_${seedOffset}_1`, name: 'احتياط 1', number: size + 1, role: 'ATT', paid: false }
+                        ]
+                    }
+                }
+            };
+        }
+
+        function getInitialSeedState() {
+            const match1 = createMatchObject({
+                id: 'match_2026_11_07',
+                date: '2026-11-07',
+                customLabel: '',
+                teamSize: 7,
+                pitchPrice: 20000,
+                includeSubsInPrice: true,
+                referee: 'كابتن علي حسين',
+                venue: 'ملعب الأبطال الخماسي',
+                matchTime: '9:00 مساءً',
+                finished: false,
+                seedOffset: 0
+            });
+
+            const match2 = createMatchObject({
+                id: 'match_2026_11_20',
+                date: '2026-11-20',
+                customLabel: '',
+                teamSize: 6,
+                pitchPrice: 24000,
+                includeSubsInPrice: true,
+                referee: 'كابتن مهند سالم',
+                venue: 'ملعب النجوم الدولي',
+                matchTime: '8:30 مساءً',
+                finished: true,
+                seedOffset: 3
+            });
+
+            return {
+                adminPassword: '1234',
+                activeMatchId: match1.id,
+                matches: [match1, match2]
+            };
         }
 
         // ==========================================
-        // 4. الاتصال بـ Firebase Firestore والمزامنة
+        // 4. الحالة العامة و Firebase / LocalStorage
         // ==========================================
-        async function initFirebaseAndSync() {
-            resetToDefaultState();
+        let db = null;
+        let auth = null;
+        let matchDocRef = null;
+        let isCloudConnected = false;
+        let isAdminMode = false;
+        let syncDebounceTimer = null;
+        let filteredDateIso = '';
+
+        let rootState = getInitialSeedState();
+        let dragContext = null;
+        let editingTarget = null;
+
+        function getActiveMatch() {
+            if (!rootState.matches || rootState.matches.length === 0) return null;
+            const found = rootState.matches.find(m => m.id === rootState.activeMatchId);
+            return found || rootState.matches[0];
+        }
+
+        function saveLocalBackup() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(rootState));
+            } catch (_) {}
+        }
+
+        function loadLocalBackup() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                if (parsed && Array.isArray(parsed.matches) && parsed.matches.length > 0) {
+                    return parsed;
+                }
+            } catch (_) {}
+            return null;
+        }
+
+        function hideLoadingOverlay(delayMs = 550) {
+            setTimeout(() => {
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) overlay.classList.add('hidden-overlay');
+            }, delayMs);
+        }
+
+        async function initApp() {
+            const localSaved = loadLocalBackup();
+            if (localSaved) {
+                rootState = {
+                    ...getInitialSeedState(),
+                    ...localSaved
+                };
+            }
+
             updateUIForMode();
             renderAll();
 
-            try {
-                const app = initializeApp(firebaseConfig);
-                try { getAnalytics(app); } catch (_) {}
-                auth = getAuth(app);
-                db = getFirestore(app);
+            // محاولة الاتصال بـ Firebase إذا كانت متغيرات البيئة متوفرة، وإلا الاعتماد على التخزين المحلي فوراً
+            const hasEnvConfig = typeof __firebase_config !== 'undefined' && __firebase_config;
+            if (hasEnvConfig) {
+                try {
+                    const appIdEnv = typeof __app_id !== 'undefined' ? __app_id : 'mudaribi-default';
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    const app = initializeApp(firebaseConfig);
+                    auth = getAuth(app);
+                    db = getFirestore(app);
+                    matchDocRef = doc(db, 'artifacts', appIdEnv, 'public', 'data', 'mudaribi_multi_matches', 'state_v1');
 
-                matchDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'mudaribi_matches', 'active_match');
+                    await signInAnonymously(auth);
 
-                onAuthStateChanged(auth, (user) => {
-                    currentUser = user;
-                    isAdminMode = Boolean(user);
-                    updateUIForMode();
-                    if (isAdminMode) {
-                        syncAdminInputs();
-                    }
-                    renderAll();
-                });
+                    onAuthStateChanged(auth, () => {
+                        updateConnectionBadge(true);
+                    });
 
-                onSnapshot(matchDocRef, (snapshot) => {
-                    isCloudConnected = true;
-                    updateConnectionBadge(true);
-
-                    if (snapshot.exists()) {
-                        const cloudData = snapshot.data();
-                        if (!dragContext) {
-                            appState = {
-                                ...appState,
-                                ...cloudData,
-                                teams: cloudData.teams || appState.teams
-                            };
-                            if (isAdminMode) {
-                                syncAdminInputs();
+                    onSnapshot(matchDocRef, (snapshot) => {
+                        isCloudConnected = true;
+                        updateConnectionBadge(true);
+                        if (snapshot.exists() && !dragContext) {
+                            const cloudData = snapshot.data();
+                            if (cloudData && Array.isArray(cloudData.matches) && cloudData.matches.length > 0) {
+                                rootState = {
+                                    ...rootState,
+                                    ...cloudData
+                                };
+                                saveLocalBackup();
+                                renderAll();
                             }
-                            renderAll();
                         }
-                    }
-                }, (error) => {
-                    console.error('Firestore listener error:', error);
-                    isCloudConnected = false;
+                        hideLoadingOverlay(450);
+                    }, (err) => {
+                        console.warn('Firestore snapshot fallback:', err);
+                        updateConnectionBadge(false);
+                        hideLoadingOverlay(500);
+                    });
+                } catch (e) {
+                    console.warn('Firebase init skipped, using local store:', e);
                     updateConnectionBadge(false);
-                });
-
-            } catch (err) {
-                console.warn('Running in offline/fallback mode:', err.message);
-                isCloudConnected = false;
+                    hideLoadingOverlay(550);
+                }
+            } else {
                 updateConnectionBadge(false);
+                hideLoadingOverlay(650);
             }
         }
 
@@ -875,55 +1240,233 @@
             if (connected) {
                 el.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> <span class="text-emerald-400 font-bold">متصل مباشر (مزامنة فورية)</span>`;
             } else {
-                el.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span> <span class="text-amber-400 font-bold">وضع محلي (بدون سحابة)</span>`;
+                el.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> <span class="text-slate-300 font-bold">جاهز ومزامنة محلية فورية</span>`;
             }
         }
 
-        // حفظ ومزامنة البيانات إلى السحابة
         window.syncToCloud = async function(showNotification = false) {
+            saveLocalBackup();
             const indicator = document.getElementById('saveIndicator');
             if (indicator) {
                 indicator.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> جاري المزامنة...`;
                 lucide.createIcons();
             }
 
-            if (isCloudConnected && db && currentUser && matchDocRef) {
+            if (isCloudConnected && db && matchDocRef) {
                 try {
                     await setDoc(matchDocRef, {
-                        ...appState,
+                        ...rootState,
                         updatedAt: Date.now()
                     });
-                    if (indicator) {
-                        indicator.innerHTML = `<i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> تمت المزامنة مع اللاعبين`;
-                        lucide.createIcons();
-                    }
-                    if (showNotification) {
-                        showToast('تم حفظ ومزامنة التشكيلة والحسابات مع جميع اللاعبين!');
-                    }
                 } catch (e) {
-                    console.error('Error saving to Firestore:', e);
-                    if (showNotification) showToast('تعذر الحفظ السحابي، تأكد من الاتصال');
+                    console.error('Cloud sync error:', e);
                 }
-            } else {
-                if (indicator) {
-                    indicator.innerHTML = `<i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> محفوظ محلياً`;
-                    lucide.createIcons();
-                }
-                if (showNotification) {
-                    showToast('تم حفظ التغييرات محلياً!');
-                }
+            }
+
+            if (indicator) {
+                indicator.innerHTML = `<i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> تمت المزامنة والحفظ`;
+                lucide.createIcons();
+            }
+            if (showNotification) {
+                showToast('تم حفظ ومزامنة جميع المباريات والتشكيلات!');
             }
         };
 
         function triggerAutoSync() {
+            saveLocalBackup();
             clearTimeout(syncDebounceTimer);
             syncDebounceTimer = setTimeout(() => {
                 window.syncToCloud(false);
-            }, 450);
+            }, 350);
         }
 
         // ==========================================
-        // 5. التبديل بين وضع اللاعبين ووضع الإدارة
+        // 5. إدارة المباريات المتعددة والتاريخ والحالة
+        // ==========================================
+        function renderMatchesBar() {
+            const bar = document.getElementById('matchesListBar');
+            const activeMatch = getActiveMatch();
+
+            if (!rootState.matches || rootState.matches.length === 0) {
+                bar.innerHTML = `<span class="text-xs text-slate-400 py-2">لا توجد مباريات حالياً. يمكنك إنشاء لعبة جديدة.</span>`;
+                return;
+            }
+
+            bar.innerHTML = rootState.matches.map(match => {
+                const isSelected = !filteredDateIso && activeMatch && activeMatch.id === match.id;
+                const titleText = buildMatchDayHeading(match);
+                const finishedTag = match.finished
+                    ? `<span class="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[10px] font-black">انتهت</span>`
+                    : `<span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">نشطة</span>`;
+
+                return `
+                    <button onclick="selectMatch('${match.id}')"
+                        class="shrink-0 flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-extrabold transition ${
+                            isSelected
+                                ? 'bg-amber-500/15 border-amber-400 text-amber-200 shadow-lg shadow-amber-950/30'
+                                : 'bg-slate-950/90 border-slate-800 text-slate-300 hover:border-slate-600 hover:text-white'
+                        }">
+                        <i data-lucide="calendar" class="w-4 h-4 ${isSelected ? 'text-amber-400' : 'text-emerald-400'}"></i>
+                        <span class="whitespace-nowrap">${titleText}</span>
+                        ${finishedTag}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        window.selectMatch = function(matchId) {
+            filteredDateIso = '';
+            document.getElementById('dateFilterInput').value = '';
+            document.getElementById('clearDateFilterBtn').classList.add('hidden');
+            rootState.activeMatchId = matchId;
+            triggerAutoSync();
+            renderAll();
+        };
+
+        window.handleDateFilterChange = function(isoDate) {
+            if (!isoDate) {
+                window.clearDateFilter();
+                return;
+            }
+            filteredDateIso = isoDate;
+            document.getElementById('clearDateFilterBtn').classList.remove('hidden');
+
+            const matchingMatch = rootState.matches.find(m => m.date === isoDate);
+            if (matchingMatch) {
+                rootState.activeMatchId = matchingMatch.id;
+                document.getElementById('noMatchForDateBox').classList.add('hidden');
+                document.getElementById('activeMatchContent').classList.remove('hidden');
+                triggerAutoSync();
+                renderAll();
+            } else {
+                document.getElementById('activeMatchContent').classList.add('hidden');
+                const noBox = document.getElementById('noMatchForDateBox');
+                noBox.classList.remove('hidden');
+                const dayName = getArabicDayName(isoDate);
+                const slashDate = formatSlashDate(isoDate);
+                document.getElementById('noMatchDateDesc').textContent =
+                    `لا يوجد لعبة مجدولة في يوم ${dayName ? dayName + ' ' : ''}${slashDate}.`;
+                const createBtn = document.getElementById('noMatchCreateBtn');
+                if (isAdminMode) {
+                    createBtn.classList.remove('hidden');
+                } else {
+                    createBtn.classList.add('hidden');
+                }
+                renderMatchesBar();
+                lucide.createIcons();
+            }
+        };
+
+        window.clearDateFilter = function() {
+            filteredDateIso = '';
+            document.getElementById('dateFilterInput').value = '';
+            document.getElementById('clearDateFilterBtn').classList.add('hidden');
+            document.getElementById('noMatchForDateBox').classList.add('hidden');
+            document.getElementById('activeMatchContent').classList.remove('hidden');
+            renderAll();
+        };
+
+        window.openCreateMatchModal = function(prefillDate = '') {
+            if (!isAdminMode) return;
+            const defaultDate = prefillDate || '2026-11-26';
+            document.getElementById('newMatchDateInput').value = defaultDate;
+            document.getElementById('newMatchSizeSelect').value = '7';
+            document.getElementById('newMatchPriceInput').value = '20000';
+            document.getElementById('newMatchVenueInput').value = 'ملعب الأبطال الخماسي';
+            document.getElementById('newMatchTimeInput').value = '9:00 مساءً';
+            document.getElementById('newMatchFinishedInput').checked = false;
+            previewNewMatchTitle();
+
+            const modal = document.getElementById('createMatchModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        };
+
+        window.closeCreateMatchModal = function() {
+            const modal = document.getElementById('createMatchModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        };
+
+        window.previewNewMatchTitle = function() {
+            const val = document.getElementById('newMatchDateInput').value;
+            const dayName = getArabicDayName(val);
+            const slashDate = formatSlashDate(val);
+            document.getElementById('newMatchPreviewTitle').textContent =
+                val ? `العنوان الظاهر: لعبة يوم ${dayName ? dayName + ' ' : ''}${slashDate}` : '';
+        };
+
+        window.handleCreateMatch = function(e) {
+            e.preventDefault();
+            if (!isAdminMode) return;
+
+            const dateVal = document.getElementById('newMatchDateInput').value;
+            if (!dateVal) return;
+
+            const newMatch = createMatchObject({
+                date: dateVal,
+                teamSize: parseInt(document.getElementById('newMatchSizeSelect').value) || 7,
+                pitchPrice: parseInt(document.getElementById('newMatchPriceInput').value) || 0,
+                venue: document.getElementById('newMatchVenueInput').value.trim() || 'ملعب الأبطال',
+                matchTime: document.getElementById('newMatchTimeInput').value.trim() || '9:00 مساءً',
+                finished: document.getElementById('newMatchFinishedInput').checked,
+                seedOffset: rootState.matches.length * 2
+            });
+
+            rootState.matches.push(newMatch);
+            rootState.activeMatchId = newMatch.id;
+            filteredDateIso = '';
+            document.getElementById('dateFilterInput').value = '';
+            document.getElementById('clearDateFilterBtn').classList.add('hidden');
+            document.getElementById('noMatchForDateBox').classList.add('hidden');
+            document.getElementById('activeMatchContent').classList.remove('hidden');
+
+            closeCreateMatchModal();
+            renderAll();
+            triggerAutoSync();
+            showToast(`تم إنشاء ${buildMatchDayHeading(newMatch)}`);
+        };
+
+        window.deleteCurrentMatch = function() {
+            if (!isAdminMode) return;
+            const activeMatch = getActiveMatch();
+            if (!activeMatch) return;
+
+            if (rootState.matches.length === 1) {
+                showToast('يجب بقاء مباراة واحدة على الأقل أو أنشئ مباراة أخرى أولاً');
+                return;
+            }
+
+            const deletedTitle = buildMatchDayHeading(activeMatch);
+            rootState.matches = rootState.matches.filter(m => m.id !== activeMatch.id);
+            rootState.activeMatchId = rootState.matches[0].id;
+
+            renderAll();
+            triggerAutoSync();
+            showToast(`تم حذف ${deletedTitle}`);
+        };
+
+        window.toggleMatchFinished = function() {
+            if (!isAdminMode) return;
+            const m = getActiveMatch();
+            if (!m) return;
+            m.finished = !m.finished;
+            renderAll();
+            triggerAutoSync();
+            showToast(m.finished ? 'تم تعيين حالة المباراة: انتهت' : 'تم إعادة المباراة إلى حالة: نشطة');
+        };
+
+        window.updateMatchDate = function(newDateIso) {
+            if (!isAdminMode || !newDateIso) return;
+            const m = getActiveMatch();
+            if (!m) return;
+            m.date = newDateIso;
+            renderAll();
+            triggerAutoSync();
+        };
+
+        // ==========================================
+        // 6. وضع الإدارة ووضع اللاعبين
         // ==========================================
         window.openLoginModal = function() {
             document.getElementById('adminPasswordInput').value = '';
@@ -931,7 +1474,7 @@
             const modal = document.getElementById('loginModal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            setTimeout(() => document.getElementById('adminEmailInput').focus(), 100);
+            setTimeout(() => document.getElementById('adminPasswordInput').focus(), 100);
         };
 
         window.closeLoginModal = function() {
@@ -940,25 +1483,23 @@
             modal.classList.remove('flex');
         };
 
-        window.handleAdminLogin = async function(e) {
+        window.handleAdminLogin = function(e) {
             e.preventDefault();
-            const email = document.getElementById('adminEmailInput').value.trim();
-            const password = document.getElementById('adminPasswordInput').value;
-            document.getElementById('loginErrorMsg').classList.add('hidden');
+            const entered = document.getElementById('adminPasswordInput').value.trim();
+            const correct = rootState.adminPassword || '1234';
 
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
+            if (entered === correct) {
+                isAdminMode = true;
                 closeLoginModal();
+                updateUIForMode();
+                renderAll();
                 showToast('مرحباً كابتن! تم تفعيل لوحة الإدارة بنجاح');
-            } catch (_) {
+            } else {
                 document.getElementById('loginErrorMsg').classList.remove('hidden');
             }
         };
 
-        window.logoutAdmin = async function() {
-            if (auth) {
-                await signOut(auth);
-            }
+        window.logoutAdmin = function() {
             isAdminMode = false;
             updateUIForMode();
             renderAll();
@@ -966,7 +1507,7 @@
         };
 
         window.openChangePasswordModal = function() {
-            document.getElementById('newAdminPasswordInput').value = appState.adminPassword || '1234';
+            document.getElementById('newAdminPasswordInput').value = rootState.adminPassword || '1234';
             const modal = document.getElementById('changePasswordModal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
@@ -982,9 +1523,9 @@
             e.preventDefault();
             const newPass = document.getElementById('newAdminPasswordInput').value.trim();
             if (newPass.length >= 3) {
-                appState.adminPassword = newPass;
+                rootState.adminPassword = newPass;
                 closeChangePasswordModal();
-                window.syncToCloud(false);
+                triggerAutoSync();
                 showToast('تم تحديث كلمة مرور الإدارة وحفظها!');
             }
         };
@@ -995,6 +1536,7 @@
             const adminLoginBtn = document.getElementById('adminLoginBtn');
             const adminControlPanel = document.getElementById('adminControlPanel');
             const playerViewSummary = document.getElementById('playerViewSummary');
+            const adminQuickAddMatchBtn = document.getElementById('adminQuickAddMatchBtn');
             const modeBadge = document.getElementById('modeBadge');
             const instructionText = document.getElementById('instructionText');
 
@@ -1005,6 +1547,8 @@
                 adminLoginBtn.classList.add('hidden');
                 adminControlPanel.classList.remove('hidden');
                 playerViewSummary.classList.add('hidden');
+                adminQuickAddMatchBtn.classList.remove('hidden');
+                adminQuickAddMatchBtn.classList.add('inline-flex');
 
                 modeBadge.textContent = 'لوحة الإدارة';
                 modeBadge.className = 'text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40';
@@ -1017,30 +1561,53 @@
                 adminLoginBtn.classList.remove('hidden');
                 adminControlPanel.classList.add('hidden');
                 playerViewSummary.classList.remove('hidden');
+                adminQuickAddMatchBtn.classList.add('hidden');
+                adminQuickAddMatchBtn.classList.remove('inline-flex');
 
                 modeBadge.textContent = 'نسخة اللاعبين';
                 modeBadge.className = 'text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
 
-                instructionText.innerHTML = `<i data-lucide="eye" class="w-4 h-4 text-emerald-400 shrink-0"></i> <span>أنت تشاهد الآن <strong>نسخة اللاعبين المباشرة</strong>. لتعديل التشكيلة أو الأسماء، اضغط على <strong>"تسجيل دخول الإدارة"</strong> في الأعلى.</span>`;
+                instructionText.innerHTML = `<i data-lucide="eye" class="w-4 h-4 text-emerald-400 shrink-0"></i> <span>أنت تشاهد الآن <strong>نسخة اللاعبين المباشرة</strong>. اختر المباراة من القائمة أعلاه لعرض خطتها وحساباتها.</span>`;
             }
             lucide.createIcons();
         }
 
         // ==========================================
-        // 6. تحديث الإعدادات والحساب المالي
+        // 7. مزامنة حقول المباراة النشطة والحساب المالي
         // ==========================================
-        function syncAdminInputs() {
-            document.getElementById('pitchPriceInput').value = appState.pitchPrice;
-            document.getElementById('includeSubsInPrice').checked = appState.includeSubsInPrice;
-            document.getElementById('refereeInput').value = appState.referee || '';
-            document.getElementById('venueInput').value = appState.venue || '';
-            document.getElementById('timeInput').value = appState.matchTime || '';
-            updateSizeUI();
-            updateFinancialSummary();
+        function syncMatchInputs() {
+            const m = getActiveMatch();
+            if (!m) return;
+
+            document.getElementById('matchDateInput').value = m.date || '';
+            document.getElementById('computedDateLabelPreview').textContent = buildMatchDayHeading(m);
+            document.getElementById('matchLabelInput').value = m.customLabel || '';
+            document.getElementById('pitchPriceInput').value = m.pitchPrice;
+            document.getElementById('includeSubsInPrice').checked = m.includeSubsInPrice;
+            document.getElementById('refereeInput').value = m.referee || '';
+            document.getElementById('venueInput').value = m.venue || '';
+            document.getElementById('timeInput').value = m.matchTime || '';
+
+            const finishedBadgeAdmin = document.getElementById('adminMatchFinishedBadge');
+            const toggleBtn = document.getElementById('toggleFinishedBtn');
+            const toggleLabel = document.getElementById('toggleFinishedLabel');
+
+            if (m.finished) {
+                finishedBadgeAdmin.classList.remove('hidden');
+                toggleBtn.className = 'px-3 py-1.5 rounded-xl text-xs font-black border bg-emerald-500/20 text-emerald-300 border-emerald-500/40 transition flex items-center gap-1.5';
+                toggleLabel.textContent = 'إعادة فتح (نشطة)';
+            } else {
+                finishedBadgeAdmin.classList.add('hidden');
+                toggleBtn.className = 'px-3 py-1.5 rounded-xl text-xs font-black border bg-rose-500/15 text-rose-300 border-rose-500/40 hover:bg-rose-500/25 transition flex items-center gap-1.5';
+                toggleLabel.textContent = 'تعيين كـ: انتهت';
+            }
+
+            updateSizeUI(m);
+            updateFinancialSummary(m);
         }
 
-        function updateSizeUI() {
-            const s = appState.teamSize;
+        function updateSizeUI(m) {
+            const s = m.teamSize;
             document.getElementById('customSizeDisplay').textContent = s;
 
             const namesMap = { 5: 'خماسي', 6: 'سداسي', 7: 'سباعي', 8: 'ثماني', 9: 'تساعي', 11: 'أحد عشر' };
@@ -1060,14 +1627,17 @@
 
         window.setTeamSize = function(newSize) {
             if (!isAdminMode) return;
-            newSize = Math.max(3, Math.min(11, parseInt(newSize) || 7));
-            if (newSize === appState.teamSize) return;
+            const m = getActiveMatch();
+            if (!m) return;
 
-            appState.teamSize = newSize;
+            newSize = Math.max(3, Math.min(11, parseInt(newSize) || 7));
+            if (newSize === m.teamSize) return;
+
+            m.teamSize = newSize;
             const defaultForm = FORMATIONS_DB[newSize] ? Object.keys(FORMATIONS_DB[newSize])[0] : 'تشكيلة مخصصة';
 
             ['A', 'B'].forEach(teamKey => {
-                const team = appState.teams[teamKey];
+                const team = m.teams[teamKey];
                 team.formation = defaultForm;
                 const coords = generateFormationCoords(newSize, defaultForm);
                 const oldPlayers = team.players;
@@ -1089,70 +1659,91 @@
                 });
             });
 
-            updateSizeUI();
             renderAll();
             triggerAutoSync();
             showToast(`تم تغيير نظام اللعب إلى ${newSize} ضد ${newSize}`);
         };
 
         window.changeTeamSize = function(delta) {
-            window.setTeamSize(appState.teamSize + delta);
+            const m = getActiveMatch();
+            if (!m) return;
+            window.setTeamSize(m.teamSize + delta);
         };
 
         window.updatePrice = function(val) {
             if (!isAdminMode) return;
-            appState.pitchPrice = Math.max(0, parseInt(val) || 0);
-            updateFinancialSummary();
+            const m = getActiveMatch();
+            if (!m) return;
+            m.pitchPrice = Math.max(0, parseInt(val) || 0);
+            updateFinancialSummary(m);
             triggerAutoSync();
         };
 
         window.toggleIncludeSubs = function(checked) {
             if (!isAdminMode) return;
-            appState.includeSubsInPrice = checked;
-            updateFinancialSummary();
+            const m = getActiveMatch();
+            if (!m) return;
+            m.includeSubsInPrice = checked;
+            updateFinancialSummary(m);
             triggerAutoSync();
         };
 
         window.updateMatchMeta = function() {
             if (!isAdminMode) return;
-            appState.referee = document.getElementById('refereeInput').value;
-            appState.venue = document.getElementById('venueInput').value;
-            appState.matchTime = document.getElementById('timeInput').value;
-            updateFinancialSummary();
+            const m = getActiveMatch();
+            if (!m) return;
+            m.customLabel = document.getElementById('matchLabelInput').value;
+            m.referee = document.getElementById('refereeInput').value;
+            m.venue = document.getElementById('venueInput').value;
+            m.matchTime = document.getElementById('timeInput').value;
+            document.getElementById('computedDateLabelPreview').textContent = buildMatchDayHeading(m);
+            updateFinancialSummary(m);
+            renderMatchesBar();
             triggerAutoSync();
         };
 
-        function updateFinancialSummary() {
-            const startersCount = appState.teams.A.players.length + appState.teams.B.players.length;
-            const subsCount = appState.teams.A.subs.length + appState.teams.B.subs.length;
-            const totalEligible = appState.includeSubsInPrice ? (startersCount + subsCount) : startersCount;
+        function updateFinancialSummary(m) {
+            if (!m) return;
+            const startersCount = m.teams.A.players.length + m.teams.B.players.length;
+            const subsCount = m.teams.A.subs.length + m.teams.B.subs.length;
+            const totalEligible = m.includeSubsInPrice ? (startersCount + subsCount) : startersCount;
 
             let paidCount = 0;
             ['A', 'B'].forEach(k => {
-                paidCount += appState.teams[k].players.filter(p => p.paid).length;
-                if (appState.includeSubsInPrice) {
-                    paidCount += appState.teams[k].subs.filter(s => s.paid).length;
+                paidCount += m.teams[k].players.filter(p => p.paid).length;
+                if (m.includeSubsInPrice) {
+                    paidCount += m.teams[k].subs.filter(s => s.paid).length;
                 }
             });
 
-            const exactCost = totalEligible > 0 ? (appState.pitchPrice / totalEligible) : 0;
+            const exactCost = totalEligible > 0 ? (m.pitchPrice / totalEligible) : 0;
             const roundedIQD = exactCost > 0 ? Math.ceil(exactCost / 250) * 250 : 0;
+            const collectedTotal = Math.min(m.pitchPrice, paidCount * roundedIQD);
+            const remainingTotal = Math.max(0, m.pitchPrice - collectedTotal);
 
-            const collectedTotal = Math.min(appState.pitchPrice, paidCount * roundedIQD);
-            const remainingTotal = Math.max(0, appState.pitchPrice - collectedTotal);
-
-            // تحديث لوحة الإدارة
             document.getElementById('totalPlayersCountBadge').textContent = `${totalEligible} لاعب`;
             document.getElementById('perPlayerCostDisplay').textContent = roundedIQD.toLocaleString('en-US');
             document.getElementById('collectedAmountNote').textContent = `المحصّل: ${collectedTotal.toLocaleString('en-US')} | المتبقي: ${remainingTotal.toLocaleString('en-US')} د.ع`;
             document.getElementById('paidCounterDisplay').textContent = `${paidCount} / ${totalEligible} لاعب`;
 
-            // تحديث بطاقة اللاعبين
-            document.getElementById('pvVenue').textContent = appState.venue || 'لم يحدد الملعب';
-            document.getElementById('pvTime').textContent = appState.matchTime || 'الوقت قيد التحديد';
-            document.getElementById('pvReferee').textContent = appState.referee || 'بدون حكم محدد';
+            document.getElementById('pvMatchTitle').textContent = buildMatchDayHeading(m);
+            const pvFinishedBadge = document.getElementById('pvFinishedBadge');
+            const pvStatusText = document.getElementById('pvStatusText');
+            if (m.finished) {
+                pvFinishedBadge.classList.remove('hidden');
+                pvStatusText.textContent = 'انتهت المباراة';
+                pvStatusText.className = 'text-[11px] text-rose-400 font-bold mt-0.5';
+            } else {
+                pvFinishedBadge.classList.add('hidden');
+                pvStatusText.textContent = 'مباراة نشطة';
+                pvStatusText.className = 'text-[11px] text-emerald-400 font-bold mt-0.5';
+            }
+
+            document.getElementById('pvVenue').textContent = m.venue || 'لم يحدد الملعب';
+            document.getElementById('pvTime').textContent = m.matchTime || 'الوقت قيد التحديد';
+            document.getElementById('pvReferee').textContent = m.referee || 'بدون حكم محدد';
             document.getElementById('pvPerPlayerCost').textContent = roundedIQD.toLocaleString('en-US');
-            document.getElementById('pvTotalPriceNote').textContent = `من أصل ${appState.pitchPrice.toLocaleString('en-US')} د.ع (${totalEligible} لاعب)`;
+            document.getElementById('pvTotalPriceNote').textContent = `من أصل ${m.pitchPrice.toLocaleString('en-US')} د.ع (${totalEligible} لاعب)`;
             document.getElementById('pvPaidRatio').textContent = `${paidCount} / ${totalEligible} لاعب`;
 
             const pct = totalEligible > 0 ? Math.round((paidCount / totalEligible) * 100) : 0;
@@ -1160,27 +1751,30 @@
         }
 
         // ==========================================
-        // 7. رسم الملاعب واللاعبين ودكة البدلاء
+        // 8. رسم الملاعب واللاعبين ودكة البدلاء
         // ==========================================
         function renderAll() {
-            updateSizeUI();
-            updateFinancialSummary();
+            renderMatchesBar();
+            const m = getActiveMatch();
+            if (!m) return;
+
+            syncMatchInputs();
 
             const container = document.getElementById('pitchesContainer');
             container.innerHTML = '';
 
             ['A', 'B'].forEach(teamKey => {
-                container.appendChild(createTeamCard(teamKey));
+                container.appendChild(createTeamCard(m, teamKey));
             });
 
             lucide.createIcons();
         }
 
-        function createTeamCard(teamKey) {
-            const team = appState.teams[teamKey];
+        function createTeamCard(m, teamKey) {
+            const team = m.teams[teamKey];
             const colorObj = TEAM_COLORS[team.colorIndex] || TEAM_COLORS[0];
-            const availableFormations = FORMATIONS_DB[appState.teamSize]
-                ? Object.keys(FORMATIONS_DB[appState.teamSize])
+            const availableFormations = FORMATIONS_DB[m.teamSize]
+                ? Object.keys(FORMATIONS_DB[m.teamSize])
                 : ['تشكيلة مخصصة'];
 
             const wrapper = document.createElement('div');
@@ -1218,22 +1812,18 @@
                 : '';
 
             wrapper.innerHTML = `
-                <!-- رأس بطاقة الفريق -->
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-slate-800">
                     <div class="flex items-center gap-2.5 flex-1">
                         <span class="w-4 h-8 rounded-full shrink-0" style="background-color: ${colorObj.bg}; border: 1px solid ${colorObj.border};"></span>
                         ${teamHeaderTitleHtml}
                     </div>
-
                     <div class="flex items-center gap-1.5 justify-end">
                         ${colorDotsHtml}
                     </div>
                 </div>
 
-                <!-- شريط الخطة والإحصائيات -->
                 <div class="flex flex-wrap items-center justify-between gap-2">
                     ${formationControlHtml}
-
                     <div class="flex items-center gap-2 text-xs text-slate-400">
                         <span class="bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
                             الأساسيين: <strong class="text-white">${team.players.length}</strong>
@@ -1244,35 +1834,26 @@
                     </div>
                 </div>
 
-                <!-- الملعب التفاعلي للفريق -->
                 <div id="pitch_${teamKey}" class="pitch-surface ${isAdminMode ? 'admin-pitch' : ''} w-full aspect-[4/4.6] sm:aspect-[4/4.3] select-none">
-                    <!-- خط المنتصف ودائرة المنتصف -->
                     <div class="pitch-line absolute top-0 left-0 right-0 h-1/2 border-b-2"></div>
                     <div class="pitch-line absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 sm:w-36 sm:h-36 rounded-full border-2"></div>
                     <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-white/70"></div>
 
-                    <!-- منطقة الجزاء السفلية (مرمى الفريق) -->
                     <div class="pitch-line absolute bottom-0 left-1/2 -translate-x-1/2 w-[58%] h-[22%] border-t-2 border-x-2"></div>
                     <div class="pitch-line absolute bottom-0 left-1/2 -translate-x-1/2 w-[28%] h-[9%] border-t-2 border-x-2"></div>
                     <div class="absolute bottom-[15%] left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-white/70"></div>
 
-                    <!-- قوس منطقة الجزاء -->
                     <div class="pitch-line absolute bottom-[22%] left-1/2 -translate-x-1/2 translate-y-1/2 w-24 h-12 rounded-t-full border-t-2"></div>
-
-                    <!-- علامات الزوايا -->
                     <div class="pitch-line absolute bottom-0 left-0 w-4 h-4 rounded-tr-full border-t-2 border-r-2"></div>
                     <div class="pitch-line absolute bottom-0 right-0 w-4 h-4 rounded-tl-full border-t-2 border-l-2"></div>
 
-                    <!-- شارة اسم الفريق في خلفية العشب -->
                     <div class="absolute top-6 left-1/2 -translate-x-1/2 text-white/15 font-black text-2xl sm:text-3xl tracking-wider pointer-events-none whitespace-nowrap">
                         ${team.name}
                     </div>
 
-                    <!-- اللاعبون على أرضية الملعب -->
                     <div id="playersLayer_${teamKey}" class="absolute inset-0"></div>
                 </div>
 
-                <!-- دكة البدلاء (الاحتياط) -->
                 <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3">
                     <div class="flex items-center justify-between mb-2.5">
                         <h4 class="text-xs font-extrabold text-slate-300 flex items-center gap-1.5">
@@ -1283,15 +1864,14 @@
                     </div>
 
                     <div id="subsList_${teamKey}" class="space-y-1.5">
-                        ${renderSubsHtml(teamKey)}
+                        ${renderSubsHtml(team)}
                     </div>
                 </div>
             `;
 
             const playersLayer = wrapper.querySelector(`#playersLayer_${teamKey}`);
             team.players.forEach((player, index) => {
-                const token = createPlayerTokenElement(teamKey, player, index, colorObj);
-                playersLayer.appendChild(token);
+                playersLayer.appendChild(createPlayerTokenElement(teamKey, player, index, colorObj));
             });
 
             return wrapper;
@@ -1302,8 +1882,6 @@
             el.className = `player-token flex flex-col items-center group ${isAdminMode ? 'admin-draggable' : 'player-readonly'}`;
             el.style.left = `${player.x}%`;
             el.style.top = `${player.y}%`;
-            el.dataset.team = teamKey;
-            el.dataset.index = index;
 
             const roleInfo = ROLE_LABELS[player.role] || ROLE_LABELS.MID;
             const paidDotClass = player.paid ? 'bg-emerald-400 ring-2 ring-slate-950' : 'bg-slate-500 ring-2 ring-slate-950';
@@ -1331,12 +1909,12 @@
             return el;
         }
 
-        function renderSubsHtml(teamKey) {
-            const team = appState.teams[teamKey];
-            if (team.subs.length === 0) {
+        function renderSubsHtml(team) {
+            if (!team.subs || team.subs.length === 0) {
                 return `<p class="text-xs text-slate-500 text-center py-2">لا يوجد لاعبين في الاحتياط حالياً</p>`;
             }
 
+            const teamKey = team.name.includes('الأول') ? 'A' : 'B';
             return team.subs.map((sub, idx) => {
                 const roleInfo = ROLE_LABELS[sub.role] || ROLE_LABELS.MID;
                 const adminButtonsHtml = isAdminMode ? `
@@ -1344,12 +1922,10 @@
                         class="px-2 py-1 rounded text-[10px] font-bold transition ${sub.paid ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-slate-800 text-slate-400 border border-slate-700'}">
                         ${sub.paid ? 'مدفوع ✓' : 'غير مدفوع'}
                     </button>
-
                     <button onclick="quickSwapSubWithPitch('${teamKey}', ${idx})" title="إدخال للملعب (تبديل)"
                         class="p-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 transition">
                         <i data-lucide="arrow-up-down" class="w-3.5 h-3.5"></i>
                     </button>
-
                     <button onclick="openPlayerModal('${teamKey}', 'subs', ${idx})" title="تعديل"
                         class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
                         <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
@@ -1369,7 +1945,6 @@
                             <span class="text-xs font-bold text-white truncate">${sub.name}</span>
                             <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${roleInfo.badge}">${sub.role}</span>
                         </div>
-
                         <div class="flex items-center gap-1.5 shrink-0">
                             ${adminButtonsHtml}
                         </div>
@@ -1379,7 +1954,7 @@
         }
 
         // ==========================================
-        // 8. نظام السحب والإفلات (وضع الإدارة فقط)
+        // 9. نظام السحب والإفلات
         // ==========================================
         function attachDragAndClickHandlers(element, teamKey, playerIndex) {
             let startX = 0;
@@ -1398,13 +1973,11 @@
                 hasMoved = false;
 
                 const pitchEl = document.getElementById(`pitch_${teamKey}`);
-                const rect = pitchEl.getBoundingClientRect();
-
                 dragContext = {
                     element,
                     teamKey,
                     playerIndex,
-                    pitchRect: rect
+                    pitchRect: pitchEl.getBoundingClientRect()
                 };
 
                 element.classList.add('dragging');
@@ -1412,6 +1985,8 @@
 
             const onPointerMove = (e) => {
                 if (!dragContext || dragContext.element !== element) return;
+                const m = getActiveMatch();
+                if (!m) return;
 
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -1433,14 +2008,15 @@
                 element.style.left = `${relX}%`;
                 element.style.top = `${relY}%`;
 
-                const player = appState.teams[teamKey].players[playerIndex];
-                player.x = Math.round(relX * 10) / 10;
-                player.y = Math.round(relY * 10) / 10;
+                const player = m.teams[teamKey].players[playerIndex];
+                if (player) {
+                    player.x = Math.round(relX * 10) / 10;
+                    player.y = Math.round(relY * 10) / 10;
+                }
             };
 
             const onPointerUp = () => {
                 if (!dragContext || dragContext.element !== element) return;
-
                 element.classList.remove('dragging');
                 dragContext = null;
 
@@ -1461,26 +2037,32 @@
         }
 
         // ==========================================
-        // 9. عمليات الإدارة (الفرق، الخطط، الاحتياط)
+        // 10. عمليات التشكيلة واللاعبين والقرعة
         // ==========================================
         window.renameTeam = function(teamKey, newName) {
             if (!isAdminMode) return;
-            appState.teams[teamKey].name = newName || (teamKey === 'A' ? 'الفريق الأول' : 'الفريق الثاني');
+            const m = getActiveMatch();
+            if (!m) return;
+            m.teams[teamKey].name = newName || (teamKey === 'A' ? 'الفريق الأول' : 'الفريق الثاني');
             triggerAutoSync();
         };
 
         window.changeTeamColor = function(teamKey, colorIndex) {
             if (!isAdminMode) return;
-            appState.teams[teamKey].colorIndex = colorIndex;
+            const m = getActiveMatch();
+            if (!m) return;
+            m.teams[teamKey].colorIndex = colorIndex;
             renderAll();
             triggerAutoSync();
         };
 
         window.applyFormation = function(teamKey, formationName) {
             if (!isAdminMode) return;
-            const team = appState.teams[teamKey];
+            const m = getActiveMatch();
+            if (!m) return;
+            const team = m.teams[teamKey];
             team.formation = formationName;
-            const coords = generateFormationCoords(appState.teamSize, formationName);
+            const coords = generateFormationCoords(m.teamSize, formationName);
 
             team.players.forEach((player, idx) => {
                 if (coords[idx]) {
@@ -1497,7 +2079,9 @@
 
         window.addSubPlayer = function(teamKey) {
             if (!isAdminMode) return;
-            const team = appState.teams[teamKey];
+            const m = getActiveMatch();
+            if (!m) return;
+            const team = m.teams[teamKey];
             const nextNum = team.players.length + team.subs.length + 1;
             team.subs.push({
                 id: `${teamKey}_sub_${Date.now()}`,
@@ -1513,7 +2097,9 @@
 
         window.toggleSubPaid = function(teamKey, subIndex) {
             if (!isAdminMode) return;
-            const sub = appState.teams[teamKey].subs[subIndex];
+            const m = getActiveMatch();
+            if (!m) return;
+            const sub = m.teams[teamKey].subs[subIndex];
             if (sub) {
                 sub.paid = !sub.paid;
                 renderAll();
@@ -1523,21 +2109,23 @@
 
         window.quickSwapSubWithPitch = function(teamKey, subIndex) {
             if (!isAdminMode) return;
-            const team = appState.teams[teamKey];
+            const m = getActiveMatch();
+            if (!m) return;
+            const team = m.teams[teamKey];
             const sub = team.subs[subIndex];
             if (!sub || team.players.length === 0) return;
 
             let targetIdx = team.players.findIndex(p => p.role === sub.role);
-            if (targetIdx === -1) {
-                targetIdx = team.players.findIndex(p => p.role !== 'GK');
-            }
+            if (targetIdx === -1) targetIdx = team.players.findIndex(p => p.role !== 'GK');
             if (targetIdx === -1) targetIdx = 0;
 
             swapPlayers(teamKey, targetIdx, subIndex);
         };
 
         function swapPlayers(teamKey, starterIdx, subIdx) {
-            const team = appState.teams[teamKey];
+            const m = getActiveMatch();
+            if (!m) return;
+            const team = m.teams[teamKey];
             const starter = team.players[starterIdx];
             const sub = team.subs[subIdx];
             if (!starter || !sub) return;
@@ -1568,16 +2156,14 @@
             showToast(`تم تبديل ${sub.name} مكان ${starter.name}`);
         }
 
-        // ==========================================
-        // 10. نافذة تعديل اللاعب (Modal Logic)
-        // ==========================================
         window.openPlayerModal = function(teamKey, listType, index) {
             if (!isAdminMode) return;
-            const player = appState.teams[teamKey][listType][index];
+            const m = getActiveMatch();
+            if (!m) return;
+            const player = m.teams[teamKey][listType][index];
             if (!player) return;
 
             const normalizedRole = player.role === 'FWD' ? 'ATT' : player.role;
-
             editingTarget = {
                 teamKey,
                 listType,
@@ -1588,7 +2174,6 @@
 
             document.getElementById('modalPlayerName').value = player.name;
             document.getElementById('modalPlayerNumber').value = player.number;
-
             updateModalRoleUI();
             updateModalPaidUI();
 
@@ -1596,9 +2181,9 @@
             const subOptions = document.getElementById('modalSubOptions');
             const deleteBtn = document.getElementById('modalDeleteSubBtn');
 
-            if (listType === 'players' && appState.teams[teamKey].subs.length > 0) {
+            if (listType === 'players' && m.teams[teamKey].subs.length > 0) {
                 swapSection.classList.remove('hidden');
-                subOptions.innerHTML = appState.teams[teamKey].subs.map((s, sIdx) => `
+                subOptions.innerHTML = m.teams[teamKey].subs.map((s, sIdx) => `
                     <button type="button" onclick="executeModalSwap(${sIdx})"
                         class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-amber-500/20 text-slate-200 hover:text-amber-300 border border-slate-700 hover:border-amber-400 text-xs font-bold flex items-center gap-1 transition">
                         <i data-lucide="repeat" class="w-3 h-3"></i>
@@ -1664,8 +2249,10 @@
 
         window.savePlayerModal = function() {
             if (!editingTarget) return;
+            const m = getActiveMatch();
+            if (!m) return;
             const { teamKey, listType, index, tempRole, tempPaid } = editingTarget;
-            const player = appState.teams[teamKey][listType][index];
+            const player = m.teams[teamKey][listType][index];
 
             const newName = document.getElementById('modalPlayerName').value.trim();
             const newNum = parseInt(document.getElementById('modalPlayerNumber').value) || player.number;
@@ -1689,23 +2276,25 @@
 
         window.deleteCurrentSub = function() {
             if (!editingTarget || editingTarget.listType !== 'subs') return;
+            const m = getActiveMatch();
+            if (!m) return;
             const { teamKey, index } = editingTarget;
-            appState.teams[teamKey].subs.splice(index, 1);
+            m.teams[teamKey].subs.splice(index, 1);
             renderAll();
             window.closePlayerModal();
             triggerAutoSync();
             showToast('تم حذف اللاعب من قائمة الاحتياط');
         };
 
-        // ==========================================
-        // 11. القرعة العشوائية، التصفير، والمشاركة
-        // ==========================================
         window.shuffleTeams = function() {
             if (!isAdminMode) return;
-            const gks = [appState.teams.A.players[0], appState.teams.B.players[0]];
+            const m = getActiveMatch();
+            if (!m) return;
+
+            const gks = [m.teams.A.players[0], m.teams.B.players[0]];
             const outfieldPool = [
-                ...appState.teams.A.players.slice(1),
-                ...appState.teams.B.players.slice(1)
+                ...m.teams.A.players.slice(1),
+                ...m.teams.B.players.slice(1)
             ];
 
             for (let i = outfieldPool.length - 1; i > 0; i--) {
@@ -1713,19 +2302,18 @@
                 [outfieldPool[i], outfieldPool[j]] = [outfieldPool[j], outfieldPool[i]];
             }
 
-            if (Math.random() > 0.5) {
-                [gks[0], gks[1]] = [gks[1], gks[0]];
-            }
+            if (Math.random() > 0.5) [gks[0], gks[1]] = [gks[1], gks[0]];
 
             const half = Math.floor(outfieldPool.length / 2);
             const newOutfieldA = outfieldPool.slice(0, half);
             const newOutfieldB = outfieldPool.slice(half);
 
             const applyNamesToTeam = (teamKey, gkObj, list) => {
-                const team = appState.teams[teamKey];
-                team.players[0].name = gkObj.name;
-                team.players[0].paid = gkObj.paid;
-
+                const team = m.teams[teamKey];
+                if (team.players[0] && gkObj) {
+                    team.players[0].name = gkObj.name;
+                    team.players[0].paid = gkObj.paid;
+                }
                 list.forEach((p, idx) => {
                     if (team.players[idx + 1]) {
                         team.players[idx + 1].name = p.name;
@@ -1757,17 +2345,38 @@
 
         window.confirmReset = function() {
             window.closeResetConfirm();
-            resetToDefaultState();
+            const m = getActiveMatch();
+            if (!m) return;
+
+            const idx = rootState.matches.findIndex(item => item.id === m.id);
+            const fresh = createMatchObject({
+                id: m.id,
+                date: m.date,
+                customLabel: m.customLabel,
+                teamSize: m.teamSize,
+                pitchPrice: m.pitchPrice,
+                includeSubsInPrice: m.includeSubsInPrice,
+                referee: m.referee,
+                venue: m.venue,
+                matchTime: m.matchTime,
+                finished: m.finished,
+                seedOffset: idx >= 0 ? idx * 2 : 0
+            });
+
+            if (idx >= 0) rootState.matches[idx] = fresh;
             renderAll();
             triggerAutoSync();
-            showToast('تمت إعادة ضبط التشكيلة ومزامنتها');
+            showToast('تمت إعادة ضبط تشكيلة المباراة الحالية');
         };
 
         window.shareMatchSummary = function() {
-            const startersCount = appState.teams.A.players.length + appState.teams.B.players.length;
-            const subsCount = appState.teams.A.subs.length + appState.teams.B.subs.length;
-            const totalEligible = appState.includeSubsInPrice ? (startersCount + subsCount) : startersCount;
-            const exactCost = totalEligible > 0 ? (appState.pitchPrice / totalEligible) : 0;
+            const m = getActiveMatch();
+            if (!m) return;
+
+            const startersCount = m.teams.A.players.length + m.teams.B.players.length;
+            const subsCount = m.teams.A.subs.length + m.teams.B.subs.length;
+            const totalEligible = m.includeSubsInPrice ? (startersCount + subsCount) : startersCount;
+            const exactCost = totalEligible > 0 ? (m.pitchPrice / totalEligible) : 0;
             const roundedIQD = exactCost > 0 ? Math.ceil(exactCost / 250) * 250 : 0;
 
             const formatTeamText = (team) => {
@@ -1782,17 +2391,18 @@
                 return txt;
             };
 
-            let summary = `🏆 *تشكيلة وحساب المباراة - تطبيق مُدَرِّبِي* 🏆\n`;
+            let summary = `🏆 *${buildMatchDayHeading(m)}* 🏆\n`;
+            if (m.finished) summary += `🔴 *الحالة:* انتهت\n`;
             summary += `━━━━━━━━━━━━━━━━━━━━\n`;
-            if (appState.venue) summary += `🏟️ *الملعب:* ${appState.venue}\n`;
-            if (appState.matchTime) summary += `⏰ *الوقت:* ${appState.matchTime}\n`;
-            if (appState.referee) summary += `🏁 *الحكم:* ${appState.referee}\n`;
-            summary += `👥 *النظام:* ${appState.teamSize} ضد ${appState.teamSize}\n`;
-            summary += `💰 *سعر الحجز الكلي:* ${appState.pitchPrice.toLocaleString('en-US')} د.ع\n`;
+            if (m.venue) summary += `🏟️ *الملعب:* ${m.venue}\n`;
+            if (m.matchTime) summary += `⏰ *الوقت:* ${m.matchTime}\n`;
+            if (m.referee) summary += `🏁 *الحكم:* ${m.referee}\n`;
+            summary += `👥 *النظام:* ${m.teamSize} ضد ${m.teamSize}\n`;
+            summary += `💰 *سعر الحجز الكلي:* ${m.pitchPrice.toLocaleString('en-US')} د.ع\n`;
             summary += `💵 *حصة اللاعب الواحد:* ${roundedIQD.toLocaleString('en-US')} د.ع (${totalEligible} لاعب)\n`;
             summary += `━━━━━━━━━━━━━━━━━━━━\n\n`;
-            summary += formatTeamText(appState.teams.A) + `\n`;
-            summary += formatTeamText(appState.teams.B);
+            summary += formatTeamText(m.teams.A) + `\n`;
+            summary += formatTeamText(m.teams.B);
             summary += `\n✅ = تم الدفع | ⏳ = بانتظار الدفع`;
 
             const textArea = document.createElement('textarea');
@@ -1803,9 +2413,9 @@
             textArea.select();
             try {
                 document.execCommand('copy');
-                showToast('تم نسخ ملخص التشكيلة والحساب! جاهز للصق في واتساب 📋');
-            } catch (err) {
-                showToast('حدث خطأ أثناء النسخ');
+                showToast('تم نسخ ملخص المباراة والتشكيلة! جاهز للصق 📋');
+            } catch (_) {
+                showToast('تعذر النسخ التلقائي');
             }
             document.body.removeChild(textArea);
         };
@@ -1823,8 +2433,7 @@
             }, 3200);
         }
 
-        // بدء التشغيل عند تحميل الصفحة
-        window.addEventListener('DOMContentLoaded', initFirebaseAndSync);
+        window.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
