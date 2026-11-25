@@ -22,7 +22,7 @@
             user-select: none;
             line-height: 1.5;
         }
-        button, input, select { font-family: inherit; }
+        button, input, select, textarea { font-family: inherit; }
         button { cursor: pointer; border: none; background: transparent; color: inherit; }
 
         .hidden { display: none !important; }
@@ -76,6 +76,7 @@
         .z-50 { z-index: 50; }
         .z-\[9999\] { z-index: 9999; }
         .overflow-hidden { overflow: hidden; }
+        .overflow-x-auto { overflow-x: auto; }
         .rounded-full { border-radius: 9999px; }
         .rounded-2xl { border-radius: 1rem; }
         .rounded-xl { border-radius: 0.75rem; }
@@ -151,6 +152,7 @@
         .w-10 { width: 2.5rem; height: 2.5rem; }
         .w-11 { width: 2.75rem; height: 2.75rem; }
         .w-12 { width: 3rem; height: 3rem; }
+        .w-16 { width: 4rem; }
         .w-24 { width: 6rem; }
         .h-1\/2 { height: 50%; }
         .h-2 { height: 0.5rem; }
@@ -287,8 +289,13 @@
         .outline-none { outline: none; }
         .pointer-events-none { pointer-events: none; }
 
-        input, select { color: #ffffff; }
+        input, select, textarea { color: #ffffff; }
         input[type="date"] { color-scheme: dark; min-height: 36px; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.6rem 0.75rem; text-align: right; border-bottom: 1px solid #1e293b; }
+        th { font-size: 0.75rem; font-weight: 800; color: #94a3b8; background-color: rgba(2, 6, 23, 0.7); }
+        td { font-size: 0.8rem; }
 
         @media (min-width: 640px) {
             .sm\:flex-row { flex-direction: row; }
@@ -431,7 +438,7 @@
         <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2">
                 <i data-lucide="shield-check" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-                <span>وضع الإدارة مفعّل — إدارة المباريات والتواريخ والخطط والحسابات</span>
+                <span>وضع الإدارة مفعّل — إدارة المباريات والتواريخ والخطط والإحصائيات والتقارير</span>
             </div>
             <div class="flex items-center gap-2">
                 <button onclick="openChangePasswordModal()" class="px-2.5 py-1 rounded-lg bg-slate-950/15 hover:bg-slate-950/25 text-slate-950 text-xs font-extrabold flex items-center gap-1 transition">
@@ -490,7 +497,7 @@
 
                 <button onclick="shareMatchSummary()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-l from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-xs sm:text-sm font-extrabold shadow-lg transition">
                     <i data-lucide="share-2" class="w-4 h-4"></i>
-                    <span class="hidden sm:inline">مشاركة التشكيلة</span>
+                    <span class="hidden sm:inline">مشاركة التقرير</span>
                 </button>
 
                 <button id="adminLoginBtn" onclick="openLoginModal()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs sm:text-sm font-extrabold border border-amber-500/40 shadow-md transition">
@@ -509,7 +516,7 @@
                 <div class="flex items-center gap-2">
                     <i data-lucide="calendar-days" class="w-5 h-5 text-amber-400"></i>
                     <div>
-                        <h2 class="text-base sm:text-lg font-black text-white">اختر اللعبة لعرض التشكيلة والمعلومات</h2>
+                        <h2 class="text-base sm:text-lg font-black text-white">اختر اللعبة لعرض التشكيلة والإحصائيات والتقرير</h2>
                         <p class="text-xs text-slate-400">لن تظهر الخطة والمعلومات إلا بعد اختيار لعبة (سواء كانت قادمة أو انتهت)</p>
                     </div>
                 </div>
@@ -533,15 +540,15 @@
                 <i data-lucide="mouse-pointer-click" class="w-6 h-6"></i>
             </div>
             <div id="noMatchMainText" class="text-xl font-black text-white">اختر لعبة من القائمة لعرض التشكيلة والمعلومات</div>
-            <p id="noMatchSubText" class="text-xs text-slate-400">اضغط على أي لعبة متوفرة في القائمة بالأعلى لإظهار تفاصيلها وتشكيلتها.</p>
+            <p id="noMatchSubText" class="text-xs text-slate-400">اضغط على أي لعبة لتظهر معلوماتها ونتيجتها وإحصائياتها حتى لو كانت انتهت.</p>
         </div>
 
         <!-- محتوى المباراة المختارة فقط -->
         <div id="activeMatchWorkspace" class="hidden space-y-6">
 
-            <!-- بطاقة معلومات المباراة للاعبين -->
-            <section id="playerViewSummary" class="bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl">
-                <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-800/80">
+            <!-- بطاقة معلومات ونتيجة المباراة للاعبين -->
+            <section id="playerViewSummary" class="bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-slate-800/80">
                     <div class="flex items-center gap-2.5">
                         <div class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
                             <i data-lucide="calendar-check" class="w-5 h-5"></i>
@@ -551,12 +558,27 @@
                                 <h2 id="pvMatchTitle" class="text-base sm:text-xl font-black text-white">لعبة يوم السبت 2026/11/3</h2>
                                 <span id="pvMatchStatusBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-sky-500/15 text-sky-300 border border-sky-500/30">قادمة</span>
                             </div>
-                            <p class="text-xs text-slate-400">معلومات وتشكيلة اللعبة المختارة</p>
+                            <p class="text-xs text-slate-400">معلومات ونتيجة وتشكيلة اللعبة المختارة</p>
                         </div>
                     </div>
                     <span id="playerFormatBadge" class="px-3 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-extrabold">
                         سباعي 7 ضد 7
                     </span>
+                </div>
+
+                <!-- شريط نتيجة المباراة -->
+                <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-center">
+                    <div class="min-w-0">
+                        <div id="pvTeamAName" class="text-xs sm:text-sm font-black text-white truncate">الفريق الأول</div>
+                        <div id="pvScoreA" class="text-2xl sm:text-3xl font-black text-amber-300 mt-0.5">0</div>
+                    </div>
+                    <div class="px-3 py-1 rounded-xl bg-slate-900 border border-slate-700 text-xs font-black text-emerald-400">
+                        النتيجة
+                    </div>
+                    <div class="min-w-0">
+                        <div id="pvTeamBName" class="text-xs sm:text-sm font-black text-white truncate">الفريق الثاني</div>
+                        <div id="pvScoreB" class="text-2xl sm:text-3xl font-black text-amber-300 mt-0.5">0</div>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -612,7 +634,7 @@
                 <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-800/80">
                     <div class="flex flex-wrap items-center gap-2">
                         <i data-lucide="sliders-horizontal" class="w-5 h-5 text-amber-400"></i>
-                        <h2 class="text-base sm:text-lg font-extrabold text-white">إعدادات المباراة المحددة والحساب المالي</h2>
+                        <h2 class="text-base sm:text-lg font-extrabold text-white">إعدادات المباراة المحددة والنتيجة والحساب المالي</h2>
                         <span id="adminMatchStatusPill" class="px-2.5 py-0.5 rounded-full text-xs font-black bg-sky-500/15 text-sky-300 border border-sky-500/30">قادمة</span>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
@@ -628,7 +650,8 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                <!-- صف بيانات تاريخ وعنوان ونتيجة المباراة -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
                     <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3">
                         <label class="text-xs font-bold text-slate-400 mb-1 block">تاريخ المباراة</label>
                         <input type="date" id="matchDateInput" onchange="updateMatchDate(this.value)"
@@ -644,6 +667,17 @@
                         <label class="text-xs font-bold text-slate-400 mb-1 block">عنوان/وصف إضافي (اختياري)</label>
                         <input type="text" id="matchCustomTitleInput" placeholder="مثال: ودية المساء" oninput="updateMatchCustomTitle(this.value)"
                             class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-lg px-3 py-1.5 text-xs sm:text-sm text-white outline-none">
+                    </div>
+
+                    <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3">
+                        <label class="text-xs font-bold text-slate-400 mb-1 block">نتيجة المباراة (أول - ثاني)</label>
+                        <div class="flex items-center justify-center gap-2 pt-0.5">
+                            <input type="number" id="scoreAInput" min="0" max="99" value="0" oninput="updateMatchScore()"
+                                class="w-16 bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-lg px-2 py-1 text-center text-sm font-black text-amber-300 outline-none">
+                            <span class="text-slate-400 font-black">-</span>
+                            <input type="number" id="scoreBInput" min="0" max="99" value="0" oninput="updateMatchScore()"
+                                class="w-16 bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-lg px-2 py-1 text-center text-sm font-black text-amber-300 outline-none">
+                        </div>
                     </div>
                 </div>
 
@@ -740,12 +774,63 @@
                 </div>
             </div>
 
+            <!-- الملاعب التفاعلية -->
             <section class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="pitchesContainer"></section>
+
+            <!-- إحصائيات اللاعبين (من سجل ومن صنع) -->
+            <section class="bg-slate-900/95 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-800">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="bar-chart-3" class="w-5 h-5 text-amber-400"></i>
+                        <div>
+                            <h2 class="text-base sm:text-lg font-black text-white">إحصائيات اللاعبين (الأهداف والصناعة)</h2>
+                            <p class="text-xs text-slate-400">عرض من سجل ومن صنع في المباراة المحددة</p>
+                        </div>
+                    </div>
+                    <div id="topPerformersSummary" class="text-xs font-bold text-amber-300"></div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>اللاعب</th>
+                                <th>الفريق</th>
+                                <th>الأهداف (سجل)</th>
+                                <th>الصناعة (صنع)</th>
+                                <th id="statsActionHeader" class="hidden">تحكم سريع</th>
+                            </tr>
+                        </thead>
+                        <tbody id="playerStatsTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- تقرير المباراة الكامل -->
+            <section class="bg-slate-900/95 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-800">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="file-text" class="w-5 h-5 text-emerald-400"></i>
+                        <div>
+                            <h2 class="text-base sm:text-lg font-black text-white">تقرير المباراة الكامل</h2>
+                            <p class="text-xs text-slate-400">ملخص النتيجة، الهدافين، الصناع، والحساب المالي للعبة</p>
+                        </div>
+                    </div>
+                    <button onclick="shareMatchSummary()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold transition">
+                        <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                        <span>نسخ التقرير</span>
+                    </button>
+                </div>
+
+                <div id="matchReportContent" class="bg-slate-950/90 border border-slate-800 rounded-xl p-4 text-xs sm:text-sm text-slate-200 space-y-2">
+                    <!-- يتم توليد تقرير المباراة هنا -->
+                </div>
+            </section>
         </div>
     </main>
 
     <footer class="bg-slate-900 border-t border-slate-800 py-4 px-4 text-center text-xs text-slate-400 mt-8">
-        <p>تطبيق <strong class="text-amber-400">مُدَرِّبِي</strong> — منصة إدارة التشكيلات والحجوزات والمباريات المتعددة.</p>
+        <p>تطبيق <strong class="text-amber-400">مُدَرِّبِي</strong> — منصة إدارة التشكيلات والحجوزات والإحصائيات والتقارير.</p>
     </footer>
 
     <!-- نافذة إنشاء لعبة جديدة -->
@@ -873,7 +958,7 @@
             <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
                 <h3 class="text-lg font-extrabold text-white flex items-center gap-2">
                     <i data-lucide="user-cog" class="w-5 h-5 text-amber-400"></i>
-                    <span>تعديل بطاقة اللاعب</span>
+                    <span>تعديل بطاقة اللاعب والإحصائيات</span>
                 </h3>
                 <button onclick="closePlayerModal()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white">
                     <i data-lucide="x" class="w-5 h-5"></i>
@@ -901,6 +986,19 @@
                         <button type="button" onclick="selectModalRole('DEF')" data-role="DEF" class="modal-role-btn py-2 rounded-xl text-xs font-extrabold border border-slate-700 bg-slate-950">دفاع (DEF)</button>
                         <button type="button" onclick="selectModalRole('MID')" data-role="MID" class="modal-role-btn py-2 rounded-xl text-xs font-extrabold border border-slate-700 bg-slate-950">وسط (MID)</button>
                         <button type="button" onclick="selectModalRole('ATT')" data-role="ATT" class="modal-role-btn py-2 rounded-xl text-xs font-extrabold border border-slate-700 bg-slate-950">هجوم (ATT)</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+                        <label class="block text-xs font-bold text-amber-300 mb-1 text-center">الأهداف (سجل)</label>
+                        <input type="number" id="modalPlayerGoals" min="0" max="99"
+                            class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-lg px-2 py-1.5 text-center text-base font-black text-white outline-none">
+                    </div>
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+                        <label class="block text-xs font-bold text-emerald-300 mb-1 text-center">الصناعة (صنع)</label>
+                        <input type="number" id="modalPlayerAssists" min="0" max="99"
+                            class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-lg px-2 py-1.5 text-center text-base font-black text-white outline-none">
                     </div>
                 </div>
 
@@ -1060,7 +1158,6 @@
         let selectedDateFilter = '';
         let initialSyncDone = false;
 
-        // لا يتم إظهار التشكيلة والمعلومات إلا بعد اختيار لعبة (activeMatchId غير فارغ)
         let appState = {
             adminPassword: '1234',
             activeMatchId: '',
@@ -1133,7 +1230,9 @@
                 role: pos.role,
                 x: pos.x,
                 y: pos.y,
-                paid: false
+                paid: false,
+                goals: 0,
+                assists: 0
             }));
         }
 
@@ -1144,6 +1243,8 @@
                 date: date || '2026-11-03',
                 customTitle,
                 finished,
+                scoreA: 0,
+                scoreB: 0,
                 teamSize,
                 pitchPrice,
                 includeSubsInPrice: true,
@@ -1156,17 +1257,34 @@
                         colorIndex: 0,
                         formation: defaultForm,
                         players: buildDefaultTeamPlayers('A', teamSize, defaultForm),
-                        subs: [{ id: `A_sub_${Date.now()}`, name: 'احتياط 1', number: 12, role: 'MID', paid: false }]
+                        subs: [{ id: `A_sub_${Date.now()}`, name: 'احتياط 1', number: 12, role: 'MID', paid: false, goals: 0, assists: 0 }]
                     },
                     B: {
                         name: 'الفريق الثاني (الصقور)',
                         colorIndex: 1,
                         formation: defaultForm,
                         players: buildDefaultTeamPlayers('B', teamSize, defaultForm),
-                        subs: [{ id: `B_sub_${Date.now()}`, name: 'احتياط 1', number: 12, role: 'ATT', paid: false }]
+                        subs: [{ id: `B_sub_${Date.now()}`, name: 'احتياط 1', number: 12, role: 'ATT', paid: false, goals: 0, assists: 0 }]
                     }
                 }
             };
+        }
+
+        function ensurePlayerStatsFields(match) {
+            match.scoreA = Number(match.scoreA) || 0;
+            match.scoreB = Number(match.scoreB) || 0;
+            ['A', 'B'].forEach(k => {
+                if (!match.teams[k]) return;
+                (match.teams[k].players || []).forEach(p => {
+                    p.goals = Number(p.goals) || 0;
+                    p.assists = Number(p.assists) || 0;
+                });
+                (match.teams[k].subs || []).forEach(s => {
+                    s.goals = Number(s.goals) || 0;
+                    s.assists = Number(s.assists) || 0;
+                });
+            });
+            return match;
         }
 
         function seedInitialMatches() {
@@ -1184,7 +1302,8 @@
 
         function getActiveMatch() {
             if (!Array.isArray(appState.matches) || !appState.activeMatchId) return null;
-            return appState.matches.find(m => m.id === appState.activeMatchId) || null;
+            const found = appState.matches.find(m => m.id === appState.activeMatchId) || null;
+            return found ? ensurePlayerStatsFields(found) : null;
         }
 
         function normalizeCloudData(cloudData) {
@@ -1192,7 +1311,7 @@
                 return {
                     adminPassword: cloudData.adminPassword || '1234',
                     activeMatchId: '',
-                    matches: cloudData.matches
+                    matches: cloudData.matches.map(ensurePlayerStatsFields)
                 };
             }
             if (cloudData.teams) {
@@ -1209,6 +1328,7 @@
                 migrated.venue = cloudData.venue || '';
                 migrated.matchTime = cloudData.matchTime || '';
                 migrated.teams = cloudData.teams;
+                ensurePlayerStatsFields(migrated);
                 return {
                     adminPassword: cloudData.adminPassword || '1234',
                     activeMatchId: '',
@@ -1311,7 +1431,7 @@
                         indicator.innerHTML = `<i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> تمت المزامنة مع اللاعبين`;
                         lucide.createIcons();
                     }
-                    if (showNotification) showToast('تم حفظ ومزامنة المباريات والخطط مع اللاعبين!');
+                    if (showNotification) showToast('تم حفظ ومزامنة المباريات والإحصائيات مع اللاعبين!');
                 } catch (e) {
                     console.error('Error saving to Firestore:', e);
                     if (showNotification) showToast('تعذر الحفظ السحابي، تأكد من الاتصال');
@@ -1354,6 +1474,7 @@
             }
 
             container.innerHTML = filteredMatches.map(m => {
+                ensurePlayerStatsFields(m);
                 const isSelected = appState.activeMatchId === m.id;
                 const statusBadge = m.finished
                     ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/30">انتهت</span>`
@@ -1364,12 +1485,12 @@
                         <div class="flex items-start justify-between gap-2">
                             <div class="min-w-0">
                                 <div class="text-sm font-black text-white truncate">${getMatchDisplayName(m)}</div>
-                                <div class="text-[11px] text-slate-400 mt-0.5 truncate">${m.venue || 'ملعب'} • ${m.teamSize} ضد ${m.teamSize}</div>
+                                <div class="text-[11px] text-slate-400 mt-0.5 truncate">${m.venue || 'ملعب'} • النتيجة: <strong class="text-amber-300">${m.scoreA} - ${m.scoreB}</strong></div>
                             </div>
                             ${statusBadge}
                         </div>
                         <div class="flex items-center justify-between text-[11px] pt-2 border-t border-slate-800/80">
-                            <span class="text-amber-300 font-bold">${isSelected ? 'تم الاختيار (معروضة)' : 'اضغط لعرض التشكيلة والمعلومات'}</span>
+                            <span class="text-amber-300 font-bold">${isSelected ? 'تم الاختيار (معروضة)' : 'اضغط لعرض التشكيلة والتقرير'}</span>
                             <span class="text-slate-400 font-bold">${formatSlashDate(m.date)}</span>
                         </div>
                     </div>
@@ -1381,7 +1502,7 @@
                 workspace.classList.add('hidden');
                 noMatchBox.classList.remove('hidden');
                 document.getElementById('noMatchMainText').textContent = 'اختر لعبة من القائمة لعرض التشكيلة والمعلومات';
-                document.getElementById('noMatchSubText').textContent = 'اضغط على أي لعبة لتظهر معلوماتها وتشكيلتها حتى لو كانت انتهت.';
+                document.getElementById('noMatchSubText').textContent = 'اضغط على أي لعبة لتظهر معلوماتها ونتيجتها وإحصائياتها حتى لو كانت انتهت.';
             } else {
                 noMatchBox.classList.add('hidden');
                 workspace.classList.remove('hidden');
@@ -1489,6 +1610,18 @@
             showToast(match.finished ? 'تم تعيين المباراة كـ: انتهت' : 'تم تعيين المباراة كـ: قادمة');
         };
 
+        window.updateMatchScore = function() {
+            if (!isAdminMode) return;
+            const match = getActiveMatch();
+            if (!match) return;
+            match.scoreA = Math.max(0, parseInt(document.getElementById('scoreAInput').value, 10) || 0);
+            match.scoreB = Math.max(0, parseInt(document.getElementById('scoreBInput').value, 10) || 0);
+            updateFinancialSummary();
+            renderMatchesList();
+            renderMatchReport(match);
+            triggerAutoSync();
+        };
+
         window.deleteCurrentMatch = function() {
             if (!isAdminMode) return;
             const match = getActiveMatch();
@@ -1570,6 +1703,7 @@
             const playerViewSummary = document.getElementById('playerViewSummary');
             const modeBadge = document.getElementById('modeBadge');
             const instructionText = document.getElementById('instructionText');
+            const statsActionHeader = document.getElementById('statsActionHeader');
 
             if (isAdminMode) {
                 adminBanner.classList.remove('hidden');
@@ -1578,10 +1712,11 @@
                 adminLoginBtn.classList.add('hidden');
                 if (getActiveMatch()) adminControlPanel.classList.remove('hidden');
                 playerViewSummary.classList.add('hidden');
+                statsActionHeader.classList.remove('hidden');
 
                 modeBadge.textContent = 'لوحة الإدارة';
                 modeBadge.className = 'text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40';
-                instructionText.innerHTML = `<i data-lucide="move" class="w-4 h-4 text-amber-400 shrink-0"></i> <span><strong>وضع الإدارة:</strong> اسحب أي لاعب لتغيير موقعه، أو <strong>انقر عليه</strong> لتعديل اسمه، مركزه، وحالة الدفع.</span>`;
+                instructionText.innerHTML = `<i data-lucide="move" class="w-4 h-4 text-amber-400 shrink-0"></i> <span><strong>وضع الإدارة:</strong> اسحب أي لاعب لتغيير موقعه، أو <strong>انقر عليه</strong> لتعديل بياناته وأهدافه وصناعته.</span>`;
             } else {
                 adminBanner.classList.add('hidden');
                 adminHeaderActions.classList.add('hidden');
@@ -1589,6 +1724,7 @@
                 adminLoginBtn.classList.remove('hidden');
                 adminControlPanel.classList.add('hidden');
                 playerViewSummary.classList.remove('hidden');
+                statsActionHeader.classList.add('hidden');
 
                 modeBadge.textContent = 'نسخة اللاعبين';
                 modeBadge.className = 'text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
@@ -1609,6 +1745,8 @@
             document.getElementById('matchDateInput').value = match.date || '2026-11-03';
             document.getElementById('matchAutoLabelPreview').textContent = buildMatchDayDateLabel(match);
             document.getElementById('matchCustomTitleInput').value = match.customTitle || '';
+            document.getElementById('scoreAInput').value = match.scoreA ?? 0;
+            document.getElementById('scoreBInput').value = match.scoreB ?? 0;
             document.getElementById('pitchPriceInput').value = match.pitchPrice;
             document.getElementById('includeSubsInPrice').checked = match.includeSubsInPrice;
             document.getElementById('refereeInput').value = match.referee || '';
@@ -1639,6 +1777,7 @@
             document.getElementById('matchAutoLabelPreview').textContent = buildMatchDayDateLabel(match);
             renderMatchesList();
             updateFinancialSummary();
+            renderMatchReport(match);
             triggerAutoSync();
         };
 
@@ -1649,6 +1788,7 @@
             match.customTitle = val;
             renderMatchesList();
             updateFinancialSummary();
+            renderMatchReport(match);
             triggerAutoSync();
         };
 
@@ -1701,7 +1841,9 @@
                         role: pos.role,
                         x: pos.x,
                         y: pos.y,
-                        paid: false
+                        paid: false,
+                        goals: 0,
+                        assists: 0
                     };
                 });
             });
@@ -1724,6 +1866,7 @@
             if (!match) return;
             match.pitchPrice = Math.max(0, parseInt(val, 10) || 0);
             updateFinancialSummary();
+            renderMatchReport(match);
             triggerAutoSync();
         };
 
@@ -1733,6 +1876,7 @@
             if (!match) return;
             match.includeSubsInPrice = checked;
             updateFinancialSummary();
+            renderMatchReport(match);
             triggerAutoSync();
         };
 
@@ -1744,13 +1888,11 @@
             match.venue = document.getElementById('venueInput').value;
             match.matchTime = document.getElementById('timeInput').value;
             updateFinancialSummary();
+            renderMatchReport(match);
             triggerAutoSync();
         };
 
-        function updateFinancialSummary() {
-            const match = getActiveMatch();
-            if (!match) return;
-
+        function calculateFinanceDetails(match) {
             const startersCount = match.teams.A.players.length + match.teams.B.players.length;
             const subsCount = match.teams.A.subs.length + match.teams.B.subs.length;
             const totalEligible = match.includeSubsInPrice ? (startersCount + subsCount) : startersCount;
@@ -1765,16 +1907,30 @@
 
             const exactCost = totalEligible > 0 ? (match.pitchPrice / totalEligible) : 0;
             const roundedIQD = exactCost > 0 ? Math.ceil(exactCost / 250) * 250 : 0;
-
             const collectedTotal = Math.min(match.pitchPrice, paidCount * roundedIQD);
             const remainingTotal = Math.max(0, match.pitchPrice - collectedTotal);
+            const pct = totalEligible > 0 ? Math.round((paidCount / totalEligible) * 100) : 0;
 
-            document.getElementById('totalPlayersCountBadge').textContent = `${totalEligible} لاعب`;
-            document.getElementById('perPlayerCostDisplay').textContent = roundedIQD.toLocaleString('en-US');
-            document.getElementById('collectedAmountNote').textContent = `المحصّل: ${collectedTotal.toLocaleString('en-US')} | المتبقي: ${remainingTotal.toLocaleString('en-US')} د.ع`;
-            document.getElementById('paidCounterDisplay').textContent = `${paidCount} / ${totalEligible} لاعب`;
+            return { totalEligible, paidCount, roundedIQD, collectedTotal, remainingTotal, pct };
+        }
+
+        function updateFinancialSummary() {
+            const match = getActiveMatch();
+            if (!match) return;
+
+            const fin = calculateFinanceDetails(match);
+
+            document.getElementById('totalPlayersCountBadge').textContent = `${fin.totalEligible} لاعب`;
+            document.getElementById('perPlayerCostDisplay').textContent = fin.roundedIQD.toLocaleString('en-US');
+            document.getElementById('collectedAmountNote').textContent = `المحصّل: ${fin.collectedTotal.toLocaleString('en-US')} | المتبقي: ${fin.remainingTotal.toLocaleString('en-US')} د.ع`;
+            document.getElementById('paidCounterDisplay').textContent = `${fin.paidCount} / ${fin.totalEligible} لاعب`;
 
             document.getElementById('pvMatchTitle').textContent = getMatchDisplayName(match);
+            document.getElementById('pvTeamAName').textContent = match.teams.A.name;
+            document.getElementById('pvTeamBName').textContent = match.teams.B.name;
+            document.getElementById('pvScoreA').textContent = match.scoreA ?? 0;
+            document.getElementById('pvScoreB').textContent = match.scoreB ?? 0;
+
             const pvStatus = document.getElementById('pvMatchStatusBadge');
             if (match.finished) {
                 pvStatus.textContent = 'انتهت';
@@ -1787,12 +1943,145 @@
             document.getElementById('pvVenue').textContent = match.venue || 'لم يحدد الملعب';
             document.getElementById('pvTime').textContent = match.matchTime || 'الوقت قيد التحديد';
             document.getElementById('pvReferee').textContent = match.referee || 'بدون حكم محدد';
-            document.getElementById('pvPerPlayerCost').textContent = roundedIQD.toLocaleString('en-US');
-            document.getElementById('pvTotalPriceNote').textContent = `من أصل ${match.pitchPrice.toLocaleString('en-US')} د.ع (${totalEligible} لاعب)`;
-            document.getElementById('pvPaidRatio').textContent = `${paidCount} / ${totalEligible} لاعب`;
+            document.getElementById('pvPerPlayerCost').textContent = fin.roundedIQD.toLocaleString('en-US');
+            document.getElementById('pvTotalPriceNote').textContent = `من أصل ${match.pitchPrice.toLocaleString('en-US')} د.ع (${fin.totalEligible} لاعب)`;
+            document.getElementById('pvPaidRatio').textContent = `${fin.paidCount} / ${fin.totalEligible} لاعب`;
+            document.getElementById('pvPaidProgressBar').style.width = `${fin.pct}%`;
+        }
 
-            const pct = totalEligible > 0 ? Math.round((paidCount / totalEligible) * 100) : 0;
-            document.getElementById('pvPaidProgressBar').style.width = `${pct}%`;
+        function collectAllPlayerStats(match) {
+            const list = [];
+            ['A', 'B'].forEach(teamKey => {
+                const team = match.teams[teamKey];
+                (team.players || []).forEach((p, idx) => {
+                    list.push({
+                        teamKey,
+                        teamName: team.name,
+                        listType: 'players',
+                        index: idx,
+                        name: p.name,
+                        number: p.number,
+                        goals: Number(p.goals) || 0,
+                        assists: Number(p.assists) || 0
+                    });
+                });
+                (team.subs || []).forEach((s, idx) => {
+                    list.push({
+                        teamKey,
+                        teamName: team.name,
+                        listType: 'subs',
+                        index: idx,
+                        name: s.name,
+                        number: s.number,
+                        goals: Number(s.goals) || 0,
+                        assists: Number(s.assists) || 0
+                    });
+                });
+            });
+            return list;
+        }
+
+        window.adjustPlayerStat = function(teamKey, listType, index, statField, delta) {
+            if (!isAdminMode) return;
+            const match = getActiveMatch();
+            if (!match) return;
+            const target = match.teams[teamKey][listType][index];
+            if (!target) return;
+
+            const currentVal = Number(target[statField]) || 0;
+            target[statField] = Math.max(0, currentVal + delta);
+
+            if (statField === 'goals' && delta > 0) {
+                if (teamKey === 'A') match.scoreA = (Number(match.scoreA) || 0) + 1;
+                if (teamKey === 'B') match.scoreB = (Number(match.scoreB) || 0) + 1;
+            }
+
+            renderAll();
+            triggerAutoSync();
+        };
+
+        function renderPlayerStatsSection(match) {
+            const tbody = document.getElementById('playerStatsTableBody');
+            const summaryEl = document.getElementById('topPerformersSummary');
+            const allPlayers = collectAllPlayerStats(match);
+
+            const scorers = allPlayers.filter(p => p.goals > 0).sort((a, b) => b.goals - a.goals);
+            const assisters = allPlayers.filter(p => p.assists > 0).sort((a, b) => b.assists - a.assists);
+
+            const topScorerText = scorers.length > 0
+                ? `الهداف: ${scorers.map(s => `${s.name} (${s.goals})`).join('، ')}`
+                : 'لا توجد أهداف مسجلة بعد';
+            const topAssisterText = assisters.length > 0
+                ? `الصناعة: ${assisters.map(a => `${a.name} (${a.assists})`).join('، ')}`
+                : 'لا توجد صناعات مسجلة بعد';
+
+            summaryEl.textContent = `${topScorerText} • ${topAssisterText}`;
+
+            const sortedRows = [...allPlayers].sort((a, b) => (b.goals + b.assists) - (a.goals + a.assists));
+
+            tbody.innerHTML = sortedRows.map(row => {
+                const actionCell = isAdminMode ? `
+                    <td>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <button onclick="adjustPlayerStat('${row.teamKey}', '${row.listType}', ${row.index}, 'goals', 1)" class="px-2 py-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[11px] font-bold">+ هدف</button>
+                            <button onclick="adjustPlayerStat('${row.teamKey}', '${row.listType}', ${row.index}, 'goals', -1)" class="px-1.5 py-1 rounded bg-slate-800 text-slate-300 text-[11px] font-bold">-</button>
+                            <button onclick="adjustPlayerStat('${row.teamKey}', '${row.listType}', ${row.index}, 'assists', 1)" class="px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold">+ صنع</button>
+                            <button onclick="adjustPlayerStat('${row.teamKey}', '${row.listType}', ${row.index}, 'assists', -1)" class="px-1.5 py-1 rounded bg-slate-800 text-slate-300 text-[11px] font-bold">-</button>
+                        </div>
+                    </td>
+                ` : '';
+
+                return `
+                    <tr>
+                        <td class="font-bold text-white">#${row.number} ${row.name}</td>
+                        <td class="text-slate-400 text-xs">${row.teamName}</td>
+                        <td class="font-black text-amber-300">${row.goals}</td>
+                        <td class="font-black text-emerald-400">${row.assists}</td>
+                        ${actionCell}
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function buildReportText(match) {
+            const fin = calculateFinanceDetails(match);
+            const allPlayers = collectAllPlayerStats(match);
+            const scorers = allPlayers.filter(p => p.goals > 0).sort((a, b) => b.goals - a.goals);
+            const assisters = allPlayers.filter(p => p.assists > 0).sort((a, b) => b.assists - a.assists);
+
+            const scorersText = scorers.length > 0
+                ? scorers.map(s => `${s.name} (${s.goals})`).join('، ')
+                : 'لا يوجد';
+            const assistersText = assisters.length > 0
+                ? assisters.map(a => `${a.name} (${a.assists})`).join('، ')
+                : 'لا يوجد';
+
+            let outcomeLabel = 'تعادل';
+            if ((match.scoreA || 0) > (match.scoreB || 0)) {
+                outcomeLabel = `فوز ${match.teams.A.name}`;
+            } else if ((match.scoreB || 0) > (match.scoreA || 0)) {
+                outcomeLabel = `فوز ${match.teams.B.name}`;
+            }
+
+            let txt = `🏆 *تقرير مباراة: ${getMatchDisplayName(match)}*\n`;
+            txt += `━━━━━━━━━━━━━━━━━━━━\n`;
+            txt += `📌 *الحالة:* ${match.finished ? 'انتهت' : 'قادمة'}\n`;
+            txt += `⚽ *النتيجة:* ${match.teams.A.name} (${match.scoreA || 0}) - (${match.scoreB || 0}) ${match.teams.B.name}\n`;
+            txt += `🏅 *الخلاصة:* ${outcomeLabel}\n`;
+            txt += `🎯 *المسجلون:* ${scorersText}\n`;
+            txt += `🅰️ *الصناع:* ${assistersText}\n`;
+            if (match.venue) txt += `🏟️ *الملعب:* ${match.venue}\n`;
+            if (match.matchTime) txt += `⏰ *الوقت:* ${match.matchTime}\n`;
+            if (match.referee) txt += `🏁 *الحكم:* ${match.referee}\n`;
+            txt += `💵 *حصة اللاعب:* ${fin.roundedIQD.toLocaleString('en-US')} د.ع | *المحصّل:* ${fin.collectedTotal.toLocaleString('en-US')} من ${match.pitchPrice.toLocaleString('en-US')} د.ع (${fin.paidCount}/${fin.totalEligible} دفعوا)\n`;
+            return txt;
+        }
+
+        function renderMatchReport(match) {
+            const box = document.getElementById('matchReportContent');
+            if (!box) return;
+            const lines = buildReportText(match).split('\n').filter(l => l.trim() && !l.includes('━'));
+            box.innerHTML = lines.map(line => `<div class="py-0.5">${line.replace(/\*/g, '')}</div>`).join('');
         }
 
         function renderAll() {
@@ -1806,6 +2095,8 @@
             if (isAdminMode) syncAdminInputs();
             updateSizeUI();
             updateFinancialSummary();
+            renderPlayerStatsSection(match);
+            renderMatchReport(match);
 
             const container = document.getElementById('pitchesContainer');
             container.innerHTML = '';
@@ -1905,7 +2196,7 @@
                         ${addSubBtnHtml}
                     </div>
                     <div id="subsList_${teamKey}" class="space-y-1.5">
-                        ${renderSubsHtml(team)}
+                        ${renderSubsHtml(team, teamKey)}
                     </div>
                 </div>
             `;
@@ -1928,6 +2219,11 @@
 
             const roleInfo = ROLE_LABELS[player.role] || ROLE_LABELS.MID;
             const paidDotClass = player.paid ? 'bg-emerald-400' : 'bg-slate-500';
+            const goals = Number(player.goals) || 0;
+            const assists = Number(player.assists) || 0;
+            const statBadge = (goals > 0 || assists > 0)
+                ? `<div class="mt-0.5 px-1.5 py-0.2 rounded bg-slate-900/95 border border-amber-400/40 text-[9px] font-black text-amber-300">⚽${goals} 🅰️${assists}</div>`
+                : '';
 
             el.innerHTML = `
                 <div class="relative">
@@ -1943,20 +2239,24 @@
                 <div class="mt-2 px-2 py-0.5 rounded-md bg-slate-950/90 border border-slate-700/80 text-[11px] sm:text-xs font-bold text-white max-w-[88px] truncate text-center">
                     ${player.name}
                 </div>
+                ${statBadge}
             `;
 
             if (isAdminMode) attachDragAndClickHandlers(el, teamKey, index);
             return el;
         }
 
-        function renderSubsHtml(team) {
+        function renderSubsHtml(team, tKey) {
             if (!team.subs || team.subs.length === 0) {
                 return `<p class="text-xs text-slate-500 text-center py-2">لا يوجد لاعبين في الاحتياط حالياً</p>`;
             }
 
             return team.subs.map((sub, idx) => {
                 const roleInfo = ROLE_LABELS[sub.role] || ROLE_LABELS.MID;
-                const tKey = team === getActiveMatch().teams.A ? 'A' : 'B';
+                const g = Number(sub.goals) || 0;
+                const a = Number(sub.assists) || 0;
+                const statText = (g > 0 || a > 0) ? `<span class="text-[10px] font-black text-amber-300">⚽${g} 🅰️${a}</span>` : '';
+
                 const adminButtonsHtml = isAdminMode ? `
                     <button onclick="toggleSubPaid('${tKey}', ${idx})"
                         class="px-2 py-1 rounded text-[10px] font-bold transition ${sub.paid ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-slate-800 text-slate-400 border border-slate-700'}">
@@ -1984,6 +2284,7 @@
                             </span>
                             <span class="text-xs font-bold text-white truncate">${sub.name}</span>
                             <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${roleInfo.badge}">${sub.role}</span>
+                            ${statText}
                         </div>
                         <div class="flex items-center gap-1.5 shrink-0">
                             ${adminButtonsHtml}
@@ -2056,6 +2357,8 @@
             const match = getActiveMatch();
             if (!match) return;
             match.teams[teamKey].name = newName || (teamKey === 'A' ? 'الفريق الأول' : 'الفريق الثاني');
+            updateFinancialSummary();
+            renderMatchReport(match);
             triggerAutoSync();
         };
 
@@ -2100,7 +2403,9 @@
                 name: `احتياط ${team.subs.length + 1}`,
                 number: nextNum,
                 role: 'MID',
-                paid: false
+                paid: false,
+                goals: 0,
+                assists: 0
             });
             renderAll();
             triggerAutoSync();
@@ -2145,7 +2450,15 @@
             const posY = starter.y;
 
             team.players[starterIdx] = { ...sub, x: posX, y: posY };
-            team.subs[subIdx] = { id: starter.id, name: starter.name, number: starter.number, role: starter.role, paid: starter.paid };
+            team.subs[subIdx] = {
+                id: starter.id,
+                name: starter.name,
+                number: starter.number,
+                role: starter.role,
+                paid: starter.paid,
+                goals: starter.goals || 0,
+                assists: starter.assists || 0
+            };
 
             renderAll();
             triggerAutoSync();
@@ -2169,6 +2482,8 @@
 
             document.getElementById('modalPlayerName').value = player.name;
             document.getElementById('modalPlayerNumber').value = player.number;
+            document.getElementById('modalPlayerGoals').value = Number(player.goals) || 0;
+            document.getElementById('modalPlayerAssists').value = Number(player.assists) || 0;
             updateModalRoleUI();
             updateModalPaidUI();
 
@@ -2248,11 +2563,15 @@
 
             const newName = document.getElementById('modalPlayerName').value.trim();
             const newNum = parseInt(document.getElementById('modalPlayerNumber').value, 10) || player.number;
+            const newGoals = Math.max(0, parseInt(document.getElementById('modalPlayerGoals').value, 10) || 0);
+            const newAssists = Math.max(0, parseInt(document.getElementById('modalPlayerAssists').value, 10) || 0);
 
             if (newName) player.name = newName;
             player.number = Math.max(1, Math.min(99, newNum));
             player.role = tempRole;
             player.paid = tempPaid;
+            player.goals = newGoals;
+            player.assists = newAssists;
 
             renderAll();
             closePlayerModal();
@@ -2355,20 +2674,17 @@
         window.shareMatchSummary = function() {
             const match = getActiveMatch();
             if (!match) {
-                showToast('اختر لعبة أولاً لمشاركة تفاصيلها');
+                showToast('اختر لعبة أولاً لمشاركة تقريرها');
                 return;
             }
-
-            const startersCount = match.teams.A.players.length + match.teams.B.players.length;
-            const subsCount = match.teams.A.subs.length + match.teams.B.subs.length;
-            const totalEligible = match.includeSubsInPrice ? (startersCount + subsCount) : startersCount;
-            const exactCost = totalEligible > 0 ? (match.pitchPrice / totalEligible) : 0;
-            const roundedIQD = exactCost > 0 ? Math.ceil(exactCost / 250) * 250 : 0;
 
             const formatTeamText = (team) => {
                 let txt = `⚽ *${team.name}* (${team.formation.split(' ')[0]}):\n`;
                 team.players.forEach(p => {
-                    txt += `  • [${p.role}] ${p.name} (#${p.number}) ${p.paid ? '✅' : '⏳'}\n`;
+                    const statsPart = ((p.goals || 0) > 0 || (p.assists || 0) > 0)
+                        ? ` [⚽${p.goals || 0} 🅰️${p.assists || 0}]`
+                        : '';
+                    txt += `  • [${p.role}] ${p.name} (#${p.number})${statsPart} ${p.paid ? '✅' : '⏳'}\n`;
                 });
                 if (team.subs.length > 0) {
                     txt += `  🔄 *الاحتياط:* ${team.subs.map(s => `${s.name} ${s.paid ? '✅' : ''}`).join('، ')}\n`;
@@ -2376,16 +2692,8 @@
                 return txt;
             };
 
-            let summary = `🏆 *${getMatchDisplayName(match)} - تطبيق مُدَرِّبِي* 🏆\n`;
-            summary += `━━━━━━━━━━━━━━━━━━━━\n`;
-            summary += `📌 *الحالة:* ${match.finished ? 'انتهت' : 'قادمة'}\n`;
-            if (match.venue) summary += `🏟️ *الملعب:* ${match.venue}\n`;
-            if (match.matchTime) summary += `⏰ *الوقت:* ${match.matchTime}\n`;
-            if (match.referee) summary += `🏁 *الحكم:* ${match.referee}\n`;
-            summary += `👥 *النظام:* ${match.teamSize} ضد ${match.teamSize}\n`;
-            summary += `💰 *سعر الحجز الكلي:* ${match.pitchPrice.toLocaleString('en-US')} د.ع\n`;
-            summary += `💵 *حصة اللاعب الواحد:* ${roundedIQD.toLocaleString('en-US')} د.ع (${totalEligible} لاعب)\n`;
-            summary += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+            let summary = buildReportText(match);
+            summary += `\n━━━━━━━━━━━━━━━━━━━━\n\n`;
             summary += formatTeamText(match.teams.A) + `\n`;
             summary += formatTeamText(match.teams.B);
 
@@ -2397,7 +2705,7 @@
             textArea.select();
             try {
                 document.execCommand('copy');
-                showToast('تم نسخ ملخص التشكيلة والحساب! جاهز للصق في واتساب 📋');
+                showToast('تم نسخ تقرير المباراة والتشكيلة! جاهز للصق في واتساب 📋');
             } catch (_) {
                 showToast('حدث خطأ أثناء النسخ');
             }
